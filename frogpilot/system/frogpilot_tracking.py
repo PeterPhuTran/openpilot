@@ -7,8 +7,8 @@ from openpilot.selfdrive.selfdrived.state import ACTIVE_STATES
 from openpilot.selfdrive.ui.soundd import FrogPilotAudibleAlert
 
 from openpilot.frogpilot.common import frogpilot_utilities
-from openpilot.frogpilot.controls.lib.frogpilot_events import RANDOM_EVENT_END, RANDOM_EVENT_START
-from openpilot.frogpilot.controls.lib.weather_checker import WEATHER_CATEGORIES
+#from openpilot.frogpilot.controls.lib.frogpilot_events import RANDOM_EVENT_END, RANDOM_EVENT_START
+#from openpilot.frogpilot.controls.lib.weather_checker import WEATHER_CATEGORIES
 
 
 CRUISE_SPEED_BUCKET_KPH = 5
@@ -34,7 +34,7 @@ class FrogPilotTracking:
     self.params = frogpilot_planner.params
 
     self.frogpilot_events = frogpilot_planner.frogpilot_events
-    self.frogpilot_weather = frogpilot_planner.frogpilot_weather
+    self.frogpilot_weather = None #frogpilot_planner.frogpilot_weather
 
     self.frogpilot_stats = self.params.get("FrogPilotStats")
     self.frogpilot_stats.pop("ResetStats", None)
