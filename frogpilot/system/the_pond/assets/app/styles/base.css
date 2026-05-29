@@ -1,0 +1,563 @@
+/* Reset + app shell layout. Mobile-first: the sidebar is off-canvas on phones and fixed on wider
+ * screens. Media queries use literal widths, never var(), which silently dies in a query (the §3.5
+ * bug). The phone is the primary client (REWRITE_PLAN §5.2, §15.4). */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+html.no-scroll {
+  overflow: hidden;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.icon {
+  display: block;
+  flex: none;
+}
+
+/* visually hidden but read by screen readers (the search result-count live region) */
+.sr-only {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition: 0.01ms;
+  }
+}
+
+/* loading + not found */
+.app-loading,
+.not-found {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.not-found h1 {
+  font-size: var(--font-size-xl);
+}
+
+.not-found p {
+  color: var(--color-text-muted);
+}
+
+/* shell */
+.app-shell {
+  height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+.app-main {
+  height: calc(100vh - var(--tap-target) - var(--space-4) - var(--space-4));
+  margin-left: 0;
+  margin-top: calc(var(--tap-target) + var(--space-4) + var(--space-4));
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-4) var(--space-6);
+}
+
+.app-main:focus {
+  outline: none;
+}
+
+/* sidebar — a full off-canvas drawer on phones; a static sidebar pinned to the left edge on wider screens.
+ * The mobile-first base styles describe the drawer; the >=768px block pins it open and hides the toggle. */
+.sidebar {
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  left: 0;
+  overflow: hidden;
+  /* trim the bottom so the footer sits near the edge instead of floating above a wide gap */
+  padding: var(--space-4) var(--space-3) var(--space-1);
+  position: fixed;
+  top: 0;
+  transform: translateX(-100%);
+  transition: transform var(--transition);
+  width: var(--sidebar-width);
+  z-index: 30;
+}
+
+.sidebar.is-open {
+  transform: translateX(0);
+}
+
+/* top row: the brand */
+.sidebar-top {
+  align-items: center;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  gap: var(--space-2);
+  padding-bottom: var(--space-3);
+}
+
+.sidebar-brand {
+  align-items: center;
+  color: var(--color-accent);
+  display: flex;
+  flex: 1;
+  gap: var(--space-2);
+  min-width: 0;
+  overflow: hidden;
+  /* line the logo up with the nav-item icon column below it rather than jutting out to the left */
+  padding-left: var(--space-3);
+}
+
+.sidebar-brand-logo {
+  flex: none;
+  height: 44px;
+  /* the 44px logo is wider than the 24px nav icons; a small left nudge sits it nicely over the icon column */
+  margin-left: -5px;
+  width: 44px;
+}
+
+@font-face {
+  font-family: "Fredoka";
+  src: url("/assets/app/fonts/fredoka.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+.sidebar-brand-text {
+  color: var(--color-accent);
+  font-family: "Fredoka", var(--font-family);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sidebar-close {
+  align-items: center;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  cursor: pointer;
+  display: flex;
+  flex: none;
+  height: calc(var(--tap-target) + 2px);
+  justify-content: center;
+  transition:
+    background var(--transition),
+    border-color var(--transition),
+    color var(--transition);
+  width: calc(var(--tap-target) + 2px);
+}
+
+.sidebar-close:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.sidebar-close:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* search */
+.sidebar-search {
+  flex: none;
+  margin: var(--space-3) 0 var(--space-2);
+}
+
+.sidebar-search-field {
+  align-items: center;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  display: flex;
+  gap: var(--space-2);
+  height: 42px;
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+  padding: 0 var(--space-2);
+  transition: outline-color var(--transition);
+}
+
+/* the search input clears its own native outline, so the ring rides on the wrapping field: a half-strength
+ * accent ring on hover previews the full accent ring it gets on focus, so hovering reads as a step between
+ * resting and active. (color-mix degrades to no hover ring on pre-2023 browsers; focus is unaffected.) */
+.sidebar-search-field:hover {
+  outline-color: color-mix(in srgb, var(--color-accent) 50%, transparent);
+}
+
+.sidebar-search-field:focus-within {
+  outline-color: var(--color-accent);
+}
+
+.sidebar-search-field .icon {
+  color: var(--color-text-muted);
+  flex: none;
+  margin: 0 4px;
+}
+
+.sidebar-search-input {
+  background: none;
+  border: none;
+  color: var(--color-text);
+  flex: 1;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  min-width: 0;
+  outline: none;
+}
+
+.sidebar-search-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* visible keyboard focus for the remaining sidebar controls (the search field rings itself, above) —
+ * matches .btn/.icon-btn in components.css */
+.sidebar-brand:focus-visible,
+.sidebar-link:focus-visible,
+.sidebar-group-header:focus-visible,
+.sidebar-result:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+.sidebar-toggle:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* scrollable nav */
+.sidebar-scroll {
+  flex: 1;
+  margin: 0 calc(var(--space-3) * -1);
+  /* min-height:0 lets this flex child scroll within its track instead of growing to its content and
+   * pushing the footer (the flexbox min-height:auto default), which is what made the footer shift on load. */
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 0 var(--space-3);
+  scrollbar-width: none;
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.sidebar-group + .sidebar-group {
+  margin-top: 2px;
+}
+
+.sidebar-group-header {
+  align-items: center;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: flex;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 700;
+  gap: var(--space-2);
+  letter-spacing: 0.12em;
+  padding: var(--space-3) var(--space-2) var(--space-1);
+  text-transform: uppercase;
+  width: 100%;
+}
+
+.sidebar-chevron {
+  align-items: center;
+  color: var(--color-text-muted);
+  display: flex;
+  flex: none;
+  transition: transform var(--transition);
+}
+
+.sidebar-group.is-collapsed .sidebar-chevron {
+  transform: rotate(-90deg);
+}
+
+.sidebar-group-name {
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.sidebar-group-count {
+  background: var(--color-surface-raised);
+  border-radius: 999px;
+  color: var(--color-text-muted);
+  flex: none;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  padding: 1px 8px;
+}
+
+/* the fold eases grid rows 1fr -> 0fr so the section slides to its exact content height */
+.sidebar-items {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows var(--transition);
+}
+
+.sidebar-items-inner {
+  overflow: hidden;
+}
+
+.sidebar-group.is-collapsed .sidebar-items {
+  grid-template-rows: 0fr;
+}
+
+.sidebar-link {
+  align-items: center;
+  border-radius: var(--radius);
+  color: var(--color-text-secondary);
+  display: flex;
+  gap: var(--space-3);
+  min-height: var(--tap-target);
+  padding: var(--space-2) var(--space-3);
+  position: relative;
+  transition:
+    background var(--transition),
+    color var(--transition);
+}
+
+.sidebar-link .icon {
+  color: var(--color-text-secondary);
+  flex: none;
+}
+
+.sidebar-link:hover {
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+}
+
+.sidebar-link:hover .icon {
+  color: var(--color-text);
+}
+
+.sidebar-link.is-active {
+  background: var(--color-accent-strong);
+  color: var(--color-accent-contrast);
+}
+
+.sidebar-link.is-active .icon {
+  color: var(--color-accent-contrast);
+}
+
+.sidebar-label {
+  white-space: nowrap;
+}
+
+.sidebar-empty {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+  padding: var(--space-4) var(--space-2);
+}
+
+/* content search results (command palette) — shown below the nav while searching */
+.sidebar-results {
+  border-top: 1px solid var(--color-border);
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+}
+
+.sidebar-results-title {
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: var(--space-2) var(--space-2) var(--space-1);
+  text-transform: uppercase;
+}
+
+.sidebar-result {
+  align-items: center;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  display: flex;
+  gap: var(--space-2);
+  justify-content: space-between;
+  min-height: var(--tap-target);
+  padding: var(--space-2) var(--space-3);
+}
+
+.sidebar-result:hover {
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+}
+
+.sidebar-result-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-result-type {
+  background: var(--color-surface-raised);
+  border-radius: 999px;
+  color: var(--color-text-muted);
+  flex: none;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  text-transform: uppercase;
+}
+
+/* the no-results / loading line, styled to match a result row (same indent, font size, row height) so it
+ * reads as the content of the results area rather than a smaller, italic aside */
+.sidebar-results-empty {
+  align-items: center;
+  color: var(--color-text-secondary);
+  display: flex;
+  min-height: var(--tap-target);
+  padding: var(--space-2) var(--space-3);
+}
+
+.sidebar-toggle {
+  align-items: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  display: flex;
+  height: var(--tap-target);
+  justify-content: center;
+  left: var(--space-4);
+  position: fixed;
+  top: var(--space-4);
+  width: var(--tap-target);
+  z-index: 40;
+}
+
+.sidebar-toggle[aria-hidden="true"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sidebar-underlay {
+  background: rgba(0, 0, 0, 0.55);
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: fixed;
+  transition: opacity var(--transition);
+  z-index: 20;
+}
+
+.sidebar-underlay.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* lockout */
+.lockout {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.lockout:focus {
+  outline: none;
+}
+
+.lockout-icon {
+  color: var(--color-accent);
+}
+
+.lockout-title {
+  font-size: var(--font-size-xl);
+}
+
+.lockout-message {
+  color: var(--color-text-muted);
+  max-width: 32rem;
+}
+
+@media (pointer: coarse) {
+  .sidebar-search-field {
+    height: auto;
+    min-height: var(--tap-target);
+  }
+
+  .sidebar-group-header {
+    min-height: var(--tap-target);
+  }
+}
+
+@media (min-width: 768px) {
+  /* on wider screens the off-canvas drawer becomes a static sidebar pinned to the left edge */
+  .app-shell {
+    height: auto;
+    overflow: visible;
+  }
+
+  .sidebar {
+    transform: none;
+  }
+
+  .sidebar-toggle,
+  .sidebar-close,
+  .sidebar-underlay {
+    display: none;
+  }
+
+  .app-main {
+    height: auto;
+    margin-left: var(--sidebar-width);
+    margin-top: 0;
+    min-height: 100vh;
+    overflow: visible;
+    padding: var(--space-6);
+  }
+}

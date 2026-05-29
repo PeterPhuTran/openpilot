@@ -1,0 +1,163 @@
+/* Model Manager view. A list of the model catalog (name + version, selected/downloaded badges) with
+ * per-row download/select/delete controls, two persistent preference toggles, a download-all + refresh
+ * toolbar, and a progress strip with a cancel button while a download runs. Reuses the shared
+ * .btn/.modal/.toast classes; only the list + preference + progress layout is view-specific
+ * (REWRITE_PLAN §4.2, §5.2, §14 B14). */
+
+.model-manager {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin: 0 auto;
+  max-width: 760px;
+}
+
+.model-manager-header {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: space-between;
+}
+
+.model-manager-title {
+  font-size: var(--font-size-xl);
+}
+
+.model-manager-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.model-manager-message {
+  color: var(--color-text-muted);
+  padding: var(--space-5) 0;
+  text-align: center;
+}
+
+.model-manager-retry {
+  align-self: center;
+}
+
+.model-manager-progress {
+  align-items: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+}
+
+.model-progress-text {
+  color: var(--color-text);
+  flex: 1 1 12rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.model-prefs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.model-pref {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  gap: var(--space-3);
+  min-height: var(--tap-target);
+}
+
+.model-pref input {
+  height: 1.25rem;
+  width: 1.25rem;
+}
+
+.model-list {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.model-row {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.model-row:not(:last-child) {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.model-row.is-selected {
+  border-left: 3px solid var(--color-accent);
+}
+
+.model-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.model-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.model-meta {
+  align-items: center;
+  color: var(--color-text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: var(--font-size-sm);
+  gap: var(--space-2);
+}
+
+.model-badge {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  padding: 0 var(--space-2);
+}
+
+.model-badge-selected {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-contrast);
+}
+
+.model-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+@media (min-width: 600px) {
+  .model-row {
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .model-actions {
+    flex-shrink: 0;
+  }
+}

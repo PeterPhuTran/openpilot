@@ -1,0 +1,6 @@
+# Dev-only tooling + build/test artifacts — never shipped to the device, never committed
+node_modules/
+test-results/
+playwright-report/
+__pycache__/
+*.pyc

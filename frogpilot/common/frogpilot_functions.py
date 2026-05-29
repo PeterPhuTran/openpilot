@@ -2,7 +2,6 @@
 import dataclasses
 import datetime
 import filecmp
-import glob
 import json
 import requests
 import shutil
@@ -14,6 +13,7 @@ import zstandard as zstd
 
 from pathlib import Path
 
+from openpilot.common.api import get_key_pair
 from openpilot.common.basedir import BASEDIR
 from openpilot.common.params import Params
 from openpilot.common.time import system_time_valid
@@ -22,7 +22,7 @@ from openpilot.system.hardware import HARDWARE
 
 from openpilot.frogpilot.assets.model_manager import ModelManager
 from openpilot.frogpilot.assets.theme_manager import ThemeManager
-from openpilot.frogpilot.common.frogpilot_utilities import delete_file, is_url_pingable, run_cmd, run_thread_with_lock, use_konik_server
+from openpilot.frogpilot.common.frogpilot_utilities import delete_file, is_url_pingable, run_cmd, use_konik_server
 from openpilot.frogpilot.common.frogpilot_variables import (
   ERROR_LOGS_PATH, EXCLUDED_KEYS, FROGPILOT_API, HD_LOGS_PATH, KONIK_LOGS_PATH, MODELS_PATH, SCREEN_RECORDINGS_PATH,
   THEME_SAVE_PATH, VIDEO_CACHE_PATH, FrogPilotVariables, frogpilot_default_params, get_frogpilot_toggles, params
@@ -114,9 +114,6 @@ def backup_toggles(params_cache):
       if key not in EXCLUDED_KEYS:
         changes_found = True
 
-  if changes_found:
-    params.put_bool("PondUploadPending", True)
-
   backup_path = Path("/data/toggle_backups")
   maximum_backups = 5
 
@@ -152,8 +149,9 @@ def frogpilot_boot_functions(build_metadata, params_cache):
   if params.get_bool("HasAcceptedTerms"):
     params_cache.clear_all()
 
-  FrogPilotVariables().update(holiday_theme="stock", started=False)
+  frogpilot_variables = FrogPilotVariables()
   ModelManager(boot_run=True)
+  frogpilot_variables.update(holiday_theme="stock", started=False)
   ThemeManager(boot_run=True).update_active_theme(time_validated=system_time_valid(), frogpilot_toggles=get_frogpilot_toggles(), boot_run=True)
 
   if VIDEO_CACHE_PATH.exists():
@@ -169,8 +167,6 @@ def frogpilot_boot_functions(build_metadata, params_cache):
   elif params.get("DongleId", encoding="utf8") == params.get("KonikDongleId", encoding="utf8"):
     params.remove("DongleId")
 
-  params.put("BuildMetadata", json.dumps(dataclasses.asdict(build_metadata)))
-
   def boot_thread():
     while not system_time_valid():
       print("Waiting for system time to become valid...")
@@ -179,7 +175,7 @@ def frogpilot_boot_functions(build_metadata, params_cache):
     backup_frogpilot(build_metadata)
     backup_toggles(params_cache)
 
-    send_stats()
+    send_stats(json.loads(params.get("LastGPSPosition") or "{}"), params, get_frogpilot_toggles())
 
   threading.Thread(target=boot_thread, daemon=True).start()
 
@@ -211,11 +207,13 @@ def register_device(build_metadata):
     while not is_url_pingable(FROGPILOT_API):
       time.sleep(60)
 
+    _, _, public_key = get_key_pair()
     payload = {
       "build_metadata": dataclasses.asdict(build_metadata),
       "device": HARDWARE.get_device_type(),
+      "device_public_key": public_key,
       "dongle_id": params.get("DongleId", encoding="utf8"),
-      "frogpilot_dongle_id": params.get("FrogPilotDongleId", encoding="utf8"),
+      "os_version": HARDWARE.get_os_version(),
     }
 
     try:

@@ -1,0 +1,85 @@
+// Every user-facing string lives here so locales can be added later by swapping this object, without
+// editing components (REWRITE_PLAN §5.2, decision §11.6 — English now, i18n-structured). Values that
+// interpolate are functions so a translation can reorder the pieces.
+import { primaryRouteStrings } from "./route_strings_primary.js";
+import { systemRouteStrings } from "./route_strings_system.js";
+
+export const strings = {
+  app: {
+    connecting: "Connecting to The Pond…",
+    loadingRoute: "Loading page...",
+    name: "The Pond",
+    routeLoadError: "Could not load this page.",
+    routeLoadRetry: "Try again",
+  },
+  common: {
+    cancel: "Cancel",
+    close: "Close",
+    delete: "Delete",
+    download: "Download",
+    save: "Save",
+  },
+  lockout: {
+    message: "The device is onroad. The Pond unlocks after the car is parked.",
+    title: "Park to use The Pond",
+  },
+  nav: {
+    dashcamRoutes: "Dashcam routes",
+    doors: "Door controls",
+    errorLogs: "Error logs",
+    home: "Home",
+    closeMenu: "Close menu",
+    maps: "Offline maps",
+    menu: "Open menu",
+    modelManager: "Model manager",
+    navigationDestination: "Set destination",
+    navigationKeys: "Navigation API keys",
+    primary: "Primary navigation",
+    recordings: "Screen recordings",
+    searchCount: (count) => `${count} ${count === 1 ? "result" : "results"}`,
+    searchEmpty: "No pages or settings found.",
+    searchLoading: "Searching…",
+    searchMore: (count) => `+${count} more. Keep typing to narrow`,
+    searchPage: "Page",
+    searchPlaceholder: "Search The Pond…",
+    searchResults: "Results",
+    settings: "Settings",
+    speedLimits: "Speed limit data",
+    tailscale: "Tailscale",
+    themeMaker: "Theme Maker",
+    tmux: "Device console",
+    toggles: "Backup and reset",
+    troubleshoot: "Troubleshoot",
+    tsk: "Toyota security keys",
+    updateManager: "Update manager",
+    vehicleFeatures: "Vehicle profile",
+  },
+  notFound: {
+    back: "Back to start",
+    message: "That page does not exist.",
+    title: "Not found",
+  },
+  search: {
+    types: {
+      branch: "Branch",
+      carMake: "Car make",
+      errorLog: "Error log",
+      issue: "Issue",
+      model: "Model",
+      securityKey: "Security key",
+      setting: "Setting",
+      theme: "Theme",
+    },
+  },
+  sections: {
+    home: "Home",
+    navigation: "Navigation",
+    personalization: "Personalization",
+    recordings: "Recordings",
+    settings: "Settings",
+    system: "System",
+    vehicle: "Vehicle",
+  },
+  ...primaryRouteStrings,
+  ...systemRouteStrings,
+};

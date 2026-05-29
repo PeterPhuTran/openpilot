@@ -2,6 +2,7 @@ venv/
 .venv/
 .ci_cache
 .env
+frogpilot/system/the_pond/.pond.local.env
 .clang-format
 .DS_Store
 .tags

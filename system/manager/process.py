@@ -21,6 +21,39 @@ WATCHDOG_FN = "/dev/shm/wd_"
 ENABLE_WATCHDOG = os.getenv("NO_WATCHDOG") is None
 
 
+def _gdb_backtrace(pid: int, use_sudo: bool = False) -> str:
+  cmd = ["gdb", "-batch", "-nx", "-ex", "set pagination off", "-ex", "thread apply all bt", "-p", str(pid)]
+  try:
+    return subprocess.run((["sudo"] + cmd) if use_sudo else cmd, capture_output=True, text=True, timeout=5).stdout
+  except Exception:
+    return ""
+
+
+def _gpu_state() -> str:
+  values = []
+  for name in ("reset_count", "gpubusy", "throttling", "gpuclk", "thermal_pwrlevel"):
+    try:
+      with open(f"/sys/class/kgsl/kgsl-3d0/{name}") as f:
+        values.append(f"{name}: {f.read().strip()}")
+    except Exception:
+      pass
+  return "\n".join(values)
+
+
+def capture_watchdog_diagnostics(name: str, pid: int) -> dict[str, str]:
+  # the hung process's own stacks, captured before it's killed, so the report shows WHY it stalled
+  diag = {"thread_backtrace.txt": _gdb_backtrace(pid)}
+  # the UI deadlocks waiting on the compositor, so the cause is on weston's/the GPU's side, not the UI's
+  if name == "ui":
+    try:
+      weston_pid = subprocess.run(["pgrep", "-x", "weston"], capture_output=True, text=True, timeout=2).stdout.split()[0]
+      diag["weston_backtrace.txt"] = _gdb_backtrace(int(weston_pid), use_sudo=True)
+    except Exception:
+      pass
+    diag["gpu_state.txt"] = _gpu_state()
+  return diag
+
+
 def launcher(proc: str, name: str) -> None:
   try:
     # import the process
@@ -105,6 +138,8 @@ class ManagerProcess(ABC):
     if dt > self.watchdog_max_dt:
       if self.watchdog_seen and ENABLE_WATCHDOG:
         cloudlog.error(f"Watchdog timeout for {self.name} (exitcode {self.proc.exitcode}) restarting ({started=})")
+        diagnostics = capture_watchdog_diagnostics(self.name, self.proc.pid)
+        sentry.capture_watchdog_timeout(self.name, dt, self.proc.exitcode, self.proc.pid, diagnostics)
         self.restart()
     else:
       self.watchdog_seen = True

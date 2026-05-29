@@ -1,0 +1,42 @@
+/* Lock/Unlock Doors view. A single static panel: a description and the two CAN actions, each gated
+ * behind a danger confirmation Modal. Reuses the shared .btn classes; only the panel + action layout is
+ * view-specific (REWRITE_PLAN §4.2, §5.2). */
+
+.doors {
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  max-width: 640px;
+}
+
+.doors-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.doors-title {
+  font-size: var(--font-size-xl);
+}
+
+.doors-text {
+  color: var(--color-text-muted);
+  line-height: var(--line-height);
+}
+
+.doors-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+@media (min-width: 600px) {
+  .doors-actions {
+    flex-direction: row;
+    gap: var(--space-4);
+  }
+}

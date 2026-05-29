@@ -1,0 +1,354 @@
+/* Theme Maker view. A mobile-first stack of asset sections (colors + 5 upload groups), a sticky action
+ * row, and modal-hosted confirmation/manage/sequence flows. Reuses the shared .btn/.icon-btn/.modal/
+ * .modal-field classes; only view-specific layout lives here (REWRITE_PLAN §4.2, §5.2). */
+
+.theme-maker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin: 0 auto;
+  max-width: 1100px;
+}
+
+.theme-maker-header {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: space-between;
+}
+
+.theme-maker-title {
+  font-size: var(--font-size-xl);
+}
+
+.tm-sections {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 700px) {
+  .tm-sections {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.tm-section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.tm-section-title {
+  font-size: var(--font-size-lg);
+}
+
+.tm-hint {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* colors */
+.tm-colors {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+}
+
+.tm-color {
+  align-items: center;
+  display: flex;
+  gap: var(--space-2);
+  justify-content: space-between;
+}
+
+.tm-color input[type="color"] {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  height: var(--tap-target);
+  min-width: var(--tap-target);
+  padding: 2px;
+}
+
+/* file upload fields */
+.tm-uploads {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.tm-file {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.tm-file-label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.tm-file-row {
+  align-items: center;
+  display: flex;
+  gap: var(--space-2);
+}
+
+.tm-file-name {
+  color: var(--color-text-muted);
+  flex: 1;
+  font-size: var(--font-size-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The native file input is hidden; the visible .tm-file-choose button proxies the click so the control
+ * is a real, focusable, 44px button rather than the unstyled browser widget. */
+.tm-file-input {
+  display: none;
+}
+
+/* turn signals */
+.tm-turn-signals {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.tm-length-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.tm-length-field > span {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.tm-length-input {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font: inherit;
+  min-height: var(--tap-target);
+  padding: var(--space-2) var(--space-3);
+  width: 100%;
+}
+
+.tm-length-input:focus-visible {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+.tm-toggle-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.tm-toggle-label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.tm-toggle {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.tm-toggle-btn {
+  flex: 1;
+}
+
+.tm-toggle-btn.is-active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-contrast);
+  font-weight: 600;
+}
+
+.tm-sequence-btn {
+  align-self: flex-start;
+}
+
+/* action row */
+.theme-maker-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.theme-maker-actions .btn {
+  flex: 1 1 auto;
+}
+
+.tm-apply {
+  flex-basis: 100%;
+}
+
+@media (min-width: 700px) {
+  .tm-apply {
+    flex-basis: auto;
+  }
+}
+
+/* name + discord fields inside the confirmation modals */
+.tm-name-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.tm-name-field > span {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* confirmation checklist */
+.tm-checklist {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+}
+
+.tm-checklist-title {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  padding: 0 var(--space-1);
+}
+
+.tm-checklist-item {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+}
+
+/* manage modal: tabs + theme list */
+.tm-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tm-tab.is-active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-contrast);
+  font-weight: 600;
+}
+
+.tm-theme-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  max-height: 50vh;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.tm-theme-empty {
+  color: var(--color-text-muted);
+  padding: var(--space-4) 0;
+  text-align: center;
+}
+
+.tm-theme-row {
+  align-items: center;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  display: flex;
+  gap: var(--space-2);
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+}
+
+.tm-theme-load {
+  align-items: center;
+  background: transparent;
+  border: none;
+  color: var(--color-text);
+  cursor: pointer;
+  display: flex;
+  flex: 1;
+  font: inherit;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  text-align: left;
+}
+
+.tm-theme-load:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.tm-theme-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tm-theme-badge {
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+}
+
+.tm-theme-readonly {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* sequence-order modal */
+.tm-sequence {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  max-height: 50vh;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.tm-sequence-item {
+  align-items: center;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  cursor: grab;
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+}
+
+.tm-sequence-preview {
+  background: #000;
+  border-radius: var(--radius-sm);
+  height: 48px;
+  object-fit: cover;
+  width: 48px;
+}
+
+.tm-sequence-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -169,7 +169,7 @@ class CarInterfaceBase(ABC):
     platform = PLATFORMS[candidate]
     fp_ret.fpFlags |= int(platform.config.flags)
 
-    fp_ret.safetyConfigs = [custom.FrogPilotCarParams.SafetyConfig.new_message()]
+    fp_ret.safetyConfigs = [custom.FrogPilotCarParams.SafetyConfig.new_message() for _ in CP.safetyConfigs]
 
     if platform not in MockCAR:
       if platform in ChryslerCAR:
@@ -182,10 +182,10 @@ class CarInterfaceBase(ABC):
 
       elif platform in HondaCAR:
         if candidate == HondaCAR.HONDA_CLARITY:
-          fp_ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HONDA_CLARITY
+          fp_ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HONDA_CLARITY
 
         if CP.enableGasInterceptor and candidate not in HONDA_BOSCH:
-          fp_ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HONDA_GAS_INTERCEPTOR
+          fp_ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HONDA_GAS_INTERCEPTOR
 
         fp_ret.canUsePedal = candidate not in HONDA_BOSCH
 
@@ -199,11 +199,11 @@ class CarInterfaceBase(ABC):
           fp_ret.isHDA2 = hda2
 
           if frogpilot_toggles.taco_tune_hacks:
-            fp_ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_TACO_TUNE_HACK
+            fp_ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_TACO_TUNE_HACK
         else:
           if 0x391 in fingerprint[0]:
             fp_ret.fpFlags |= HyundaiFrogPilotFlags.CAN_LFA_BTN.value
-            fp_ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_LFA_BTN
+            fp_ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_LFA_BTN
 
           if 0x53E in fingerprint[2]:
             fp_ret.fpFlags |= HyundaiFrogPilotFlags.LKAS12.value
@@ -213,15 +213,18 @@ class CarInterfaceBase(ABC):
 
       elif platform in SubaruCAR:
         if not (CP.flags & SubaruFlags.GLOBAL_GEN2 or CP.flags & SubaruFlags.HYBRID) and frogpilot_toggles.subaru_sng:
-          fp_ret.safetyConfigs[0].safetyParam |= Panda.FLAG_SUBARU_SNG
+          fp_ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_SUBARU_SNG
 
       elif platform in ToyotaCAR:
+        if frogpilot_toggles.toyota_dsu_bypass:
+          fp_ret.fpFlags |= ToyotaFrogPilotFlags.DSU_BYPASS.value
+
         if candidate == ToyotaCAR.TOYOTA_PRIUS:
           if 0x23 in fingerprint[0]:
             fp_ret.fpFlags |= ToyotaFrogPilotFlags.ZSS.value
 
         if CP.enableGasInterceptor:
-          fp_ret.safetyConfigs[0].safetyParam |= Panda.FLAG_TOYOTA_GAS_INTERCEPTOR
+          fp_ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_TOYOTA_GAS_INTERCEPTOR
 
         fp_ret.canUsePedal = not CP.autoResumeSng
         fp_ret.canUseSDSU = not CP.enableDsu and candidate not in UNSUPPORTED_DSU_CAR and candidate not in TSS2_CAR

@@ -1,0 +1,61 @@
+/* Download Speed Limits view. A single static panel: a description, the download action, and the
+ * external submission link. Reuses the shared .btn classes; only the panel + link layout is view-specific
+ * (REWRITE_PLAN §4.2, §5.2). */
+
+.speed-limits {
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  max-width: 640px;
+}
+
+.speed-limits-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.speed-limits-title {
+  font-size: var(--font-size-xl);
+}
+
+.speed-limits-text {
+  color: var(--color-text-muted);
+  line-height: var(--line-height);
+}
+
+.speed-limits-actions {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.speed-limits-link {
+  align-items: center;
+  color: var(--color-accent);
+  display: inline-flex;
+  min-height: var(--tap-target);
+  text-decoration: underline;
+}
+
+.speed-limits-link:hover {
+  color: var(--color-accent-strong);
+}
+
+.speed-limits-link:focus-visible {
+  border-radius: var(--radius-sm);
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (min-width: 600px) {
+  .speed-limits-actions {
+    flex-direction: row;
+    gap: var(--space-5);
+  }
+}

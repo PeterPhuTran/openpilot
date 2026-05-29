@@ -1,0 +1,157 @@
+/* Tmux Log view. A live device console (SSE tail) stacked above the saved-capture list with download /
+ * rename / delete / delete-all controls. Reuses the shared .btn/.modal classes; only the console pane and
+ * the saved-log rows are view-specific (REWRITE_PLAN §4.2, §5.2). */
+
+.tmux {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin: 0 auto;
+  max-width: 900px;
+}
+
+.tmux-title {
+  font-size: var(--font-size-xl);
+}
+
+/* live console */
+.tmux-live {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.tmux-live-head {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: space-between;
+}
+
+.tmux-live-title {
+  align-items: center;
+  display: flex;
+  font-size: var(--font-size-lg);
+  gap: var(--space-2);
+}
+
+.tmux-live-paused {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.tmux-console {
+  background: #000;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  font-size: var(--font-size-sm);
+  margin: 0;
+  max-height: 50vh;
+  min-height: 12rem;
+  overflow: auto;
+  padding: var(--space-3);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* saved logs */
+.tmux-saved {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.tmux-saved-head {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: space-between;
+}
+
+.tmux-saved-title {
+  font-size: var(--font-size-lg);
+}
+
+.tmux-saved-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.tmux-saved-message {
+  color: var(--color-text-muted);
+  padding: var(--space-5) 0;
+  text-align: center;
+}
+
+.tmux-saved-retry {
+  align-self: center;
+}
+
+.tmux-saved-list {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.tmux-saved-item {
+  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
+
+.tmux-saved-item:not(:last-child) {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tmux-saved-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.tmux-saved-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tmux-saved-age {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.tmux-saved-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+@media (min-width: 600px) {
+  .tmux-saved-item {
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .tmux-saved-info {
+    flex: 1;
+  }
+
+  .tmux-saved-row-actions {
+    flex-wrap: nowrap;
+  }
+}

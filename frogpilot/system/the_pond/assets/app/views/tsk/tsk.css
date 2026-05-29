@@ -1,0 +1,97 @@
+/* Toyota Security Keys view. A single form panel: a saved-key selector, name + value inputs, and
+ * Save / Apply / Delete actions. Reuses the shared .btn/.btn-primary/.btn-danger classes; only the
+ * panel + field layout is view-specific (REWRITE_PLAN §4.2, §5.2). */
+
+.tsk {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin: 0 auto;
+  max-width: 640px;
+}
+
+.tsk-header {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: space-between;
+}
+
+.tsk-title {
+  font-size: var(--font-size-xl);
+}
+
+.tsk-message {
+  color: var(--color-text-muted);
+  padding: var(--space-4) 0 0;
+  text-align: center;
+}
+
+.tsk-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.tsk-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.tsk-label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.tsk-input,
+.tsk-select {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font: inherit;
+  min-height: var(--tap-target);
+  padding: var(--space-2) var(--space-3);
+  width: 100%;
+}
+
+.tsk-input:focus-visible,
+.tsk-select:focus-visible {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+.tsk-select:disabled {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.tsk-error {
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+}
+
+.tsk-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.tsk .btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@media (min-width: 600px) {
+  .tsk-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}

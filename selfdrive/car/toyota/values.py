@@ -66,7 +66,8 @@ class ToyotaFlags(IntFlag):
   SECOC = 4096
 
 class ToyotaFrogPilotFlags(IntFlag):
-  ZSS = 1
+  DSU_BYPASS = 1
+  ZSS = 2
 
 class Footnote(Enum):
   CAMRY = CarFootnote(

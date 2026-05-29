@@ -1,0 +1,51 @@
+/*
+ * Design tokens — the one source of palette, type, spacing, radius, and shadow for every view
+ * (REWRITE_PLAN §5.2). The palette is anchored on FrogPilot's frog/green brand so the dashboard feels
+ * of a piece with the on-device UI.
+ */
+:root {
+  /* brand + status */
+  --color-accent: #6abe4f;
+  --color-accent-strong: #4f9e38;
+  --color-accent-contrast: #08130a;
+  --color-danger: #c0392b;
+  --color-danger-strong: #a93226;
+
+  /* dark surfaces */
+  --color-bg: #0f1411;
+  --color-surface: #18211c;
+  --color-surface-raised: #1f2b24;
+  --color-border: #2c3a31;
+  --color-text: #e9efe9;
+  --color-text-secondary: #c6d1c9;
+  --color-text-muted: #a3b4a8;
+
+  /* typography */
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.75rem;
+  --line-height: 1.5;
+
+  /* spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  /* shape + depth */
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 8px 28px rgba(0, 0, 0, 0.5);
+
+  /* shell metrics */
+  --sidebar-width: 260px;
+  --tap-target: 44px;
+  --transition: 160ms ease;
+}

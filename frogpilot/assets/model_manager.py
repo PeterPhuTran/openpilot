@@ -10,8 +10,8 @@ from pathlib import Path
 from urllib.parse import quote_plus
 
 from openpilot.common.basedir import BASEDIR
-from openpilot.frogpilot.assets.download_functions import GITLAB_URL, download_file, get_remote_file_size, get_repository_url, handle_error, handle_request_error, verify_download
-from openpilot.frogpilot.common.frogpilot_utilities import delete_file, extract_tar, load_json_file, update_json_file
+from openpilot.frogpilot.assets.download_functions import GITLAB_URL, download_file, get_repository_url, handle_error, handle_request_error, verify_download
+from openpilot.frogpilot.common.frogpilot_utilities import delete_file, load_json_file, update_json_file
 from openpilot.frogpilot.common.frogpilot_variables import (
   DEFAULT_MODEL, DEFAULT_MODEL_NAME, DEFAULT_MODEL_VERSION, MODELS_PATH, RESOURCES_REPO, TINYGRAD_FILES,
   params, params_default, params_memory, update_frogpilot_toggles
@@ -24,13 +24,11 @@ CANCEL_DOWNLOAD_PARAM = "CancelModelDownload"
 DOWNLOAD_PROGRESS_PARAM = "ModelDownloadProgress"
 MODEL_DOWNLOAD_PARAM = "ModelToDownload"
 MODEL_DOWNLOAD_ALL_PARAM = "DownloadAllModels"
-UPDATE_TINYGRAD_PARAM = "UpdateTinygrad"
 
 DEFAULT_TINYGRAD_SIZE = 87746736
 TAR_FILE_NAME = f"Tinygrad_{VERSION}.tar.gz"
 
 TINYGRAD_MODELD_PATH = Path(BASEDIR) / "frogpilot/tinygrad_modeld"
-TINYGRAD_REPO_PATH = Path(BASEDIR) / "tinygrad_repo"
 
 class ModelManager:
   def __init__(self, boot_run=False):
@@ -123,16 +121,6 @@ class ModelManager:
 
     if need_to_update_models:
       params_memory.put_bool(MODEL_DOWNLOAD_ALL_PARAM, True)
-
-  def check_tinygrad(self, repo_url):
-    tinygrad_url = f"{repo_url}/Tinygrad/{TAR_FILE_NAME}"
-
-    expected_size = get_remote_file_size(tinygrad_url, self.session)
-    local_size = int(self.tinygrad_sizes.get(TAR_FILE_NAME, 0))
-
-    if expected_size > 0 and local_size != expected_size:
-      print(f"Tinygrad version {VERSION} is outdated, expected_size: {expected_size}, local_size: {local_size}, flagging for update...")
-      params.put_bool("TinygradUpdateAvailable", True)
 
   def copy_default_model(self):
     classic_default_model_path = MODELS_PATH / "wd-40.thneed"
@@ -368,7 +356,6 @@ class ModelManager:
       if model_info:
         self.update_model_params(model_info)
         self.check_models(boot_run, repo_url)
-        self.check_tinygrad(repo_url)
     except Exception as exception:
       handle_request_error(exception, None, None, None)
       return []
@@ -401,71 +388,6 @@ class ModelManager:
     self.model_sizes[file_path.name] = file_path.stat().st_size
     update_json_file(self.model_sizes_path, self.model_sizes)
     print(f"Updated size for {file_path.name} in {self.model_sizes_path.name}")
-
-  def update_tinygrad_size(self, file_path):
-    self.tinygrad_sizes[TAR_FILE_NAME] = file_path.stat().st_size
-    update_json_file(self.tinygrad_sizes_path, self.tinygrad_sizes)
-    print(f"Updated size for {TAR_FILE_NAME} in {self.tinygrad_sizes_path.name}")
-
-  def update_tinygrad(self):
-    repo_url = get_repository_url(self.session)
-    if not repo_url:
-      handle_error(None, "GitHub and GitLab are offline...", "Repository unavailable", None, None)
-      return
-
-    primary_url = f"{repo_url}/Tinygrad/{TAR_FILE_NAME}"
-    fallback_url = f"https://gitlab.com/{RESOURCES_REPO}/-/raw/Tinygrad/{TAR_FILE_NAME}"
-
-    tinygrad_tar_path = Path("/data/tmp/tinygrad.tar.gz")
-    try:
-      print(f"Attempting to download tinygrad from {primary_url}...")
-      download_file(CANCEL_DOWNLOAD_PARAM, tinygrad_tar_path, DOWNLOAD_PROGRESS_PARAM, primary_url, UPDATE_TINYGRAD_PARAM, self.session)
-
-      if params_memory.get_bool(CANCEL_DOWNLOAD_PARAM):
-        delete_file(tinygrad_tar_path)
-
-        handle_error(None, "Tinygrad update cancelled...", "Tinygrad update cancelled...", UPDATE_TINYGRAD_PARAM, DOWNLOAD_PROGRESS_PARAM)
-        params_memory.remove("CancelModelDownload")
-        return
-
-      if not verify_download(tinygrad_tar_path, primary_url, self.session):
-        print(f"Verification failed for {primary_url}. Retrying from GitLab...")
-        download_file(CANCEL_DOWNLOAD_PARAM, tinygrad_tar_path, DOWNLOAD_PROGRESS_PARAM, fallback_url, UPDATE_TINYGRAD_PARAM, self.session)
-
-      if params_memory.get_bool(CANCEL_DOWNLOAD_PARAM):
-        delete_file(tinygrad_tar_path)
-
-        handle_error(None, "Tinygrad update cancelled...", "Tinygrad update cancelled...", UPDATE_TINYGRAD_PARAM, DOWNLOAD_PROGRESS_PARAM)
-        params_memory.remove("CancelModelDownload")
-        return
-
-      if not verify_download(tinygrad_tar_path, fallback_url, self.session):
-        handle_error(tinygrad_tar_path, "Verification Failed", "Tinygrad verification failed", UPDATE_TINYGRAD_PARAM, DOWNLOAD_PROGRESS_PARAM)
-        return
-
-      print("Tinygrad downloaded successfully! Proceeding with installation...")
-      self.update_tinygrad_size(tinygrad_tar_path)
-
-      params_memory.put(DOWNLOAD_PROGRESS_PARAM, "Installing...")
-
-      print("Deleting old tinygrad directories...")
-      delete_file(TINYGRAD_MODELD_PATH)
-      print(f"Removed {TINYGRAD_MODELD_PATH}")
-      delete_file(TINYGRAD_REPO_PATH)
-      print(f"Removed {TINYGRAD_REPO_PATH}")
-
-      extract_tar(tinygrad_tar_path, Path(BASEDIR))
-
-      print("Tinygrad update completed successfully!")
-
-      params.put_bool("TinygradUpdateAvailable", False)
-
-      params_memory.put(DOWNLOAD_PROGRESS_PARAM, "Updated!")
-      params_memory.remove(UPDATE_TINYGRAD_PARAM)
-
-      self.update_tinygrad_models(repo_url)
-    except Exception as exception:
-      handle_error(tinygrad_tar_path, "Update Failed", f"An unexpected error occurred: {exception}", UPDATE_TINYGRAD_PARAM, DOWNLOAD_PROGRESS_PARAM)
 
   def update_tinygrad_models(self, repo_url=None):
     print("Updating old Tinygrad models...")
@@ -526,8 +448,6 @@ class ModelManager:
         self.tinygrad_sizes[TAR_FILE_NAME] = DEFAULT_TINYGRAD_SIZE
         update_json_file(self.tinygrad_sizes_path, self.tinygrad_sizes)
         print(f"Updated size for {TAR_FILE_NAME} in {self.tinygrad_sizes_path.name}")
-
-        params.remove("TinygradUpdateAvailable")
 
     VERSION_PATH.write_text(VERSION)
     print(f"Updated {VERSION_PATH} to {VERSION}")

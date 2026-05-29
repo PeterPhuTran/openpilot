@@ -1,0 +1,80 @@
+/* Manage Keys view. Two stacked credential groups (Mapbox, AMap); each key is one labeled field plus a
+ * save/delete control, with the contextual Mapbox setup screenshot. Shared .btn/.icon-btn/.modal/.toast
+ * classes are reused; only view-specific layout lives here (REWRITE_PLAN §4.2, §12.2). */
+
+.navkeys {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin: 0 auto;
+  max-width: 640px;
+}
+
+.navkeys-message {
+  color: var(--color-text-muted);
+  padding: var(--space-5) 0;
+  text-align: center;
+}
+
+.navkeys-group {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.navkeys-title {
+  align-items: center;
+  display: flex;
+  font-size: var(--font-size-lg);
+  gap: var(--space-2);
+}
+
+.navkeys-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.navkeys-label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.navkeys-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.navkeys-input {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  flex: 1 1 12rem;
+  font: inherit;
+  min-height: var(--tap-target);
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+}
+
+.navkeys-input:focus-visible {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+.navkeys-help {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.navkeys-help-img {
+  display: block;
+  height: auto;
+  width: 100%;
+}

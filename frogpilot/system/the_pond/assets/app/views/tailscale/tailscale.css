@@ -1,0 +1,85 @@
+/* Tailscale view. A single static panel: a description, the live install status, the one primary
+ * action (Install or Uninstall, the latter behind a danger confirmation Modal), the post-setup login
+ * link, and a fixed external download link. Reuses the shared .btn classes; only the panel + status
+ * layout is view-specific (REWRITE_PLAN §4.2, §5.2). */
+
+.tailscale {
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  max-width: 640px;
+}
+
+.tailscale-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.tailscale-title {
+  font-size: var(--font-size-xl);
+}
+
+.tailscale-text {
+  color: var(--color-text-muted);
+  line-height: var(--line-height);
+}
+
+.tailscale-status {
+  font-weight: 600;
+}
+
+.tailscale-status-error {
+  color: var(--color-danger);
+}
+
+.tailscale-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.tailscale-auth {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.tailscale-auth-prompt {
+  color: var(--color-text-muted);
+  line-height: var(--line-height);
+}
+
+.tailscale-download {
+  align-items: center;
+  align-self: flex-start;
+  color: var(--color-accent);
+  display: inline-flex;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  text-decoration: none;
+}
+
+.tailscale-download:hover {
+  text-decoration: underline;
+}
+
+.tailscale-download:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (min-width: 600px) {
+  .tailscale-actions {
+    flex-direction: row;
+    gap: var(--space-4);
+  }
+}

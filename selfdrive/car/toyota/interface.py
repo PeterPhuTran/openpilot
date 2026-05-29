@@ -122,7 +122,7 @@ class CarInterface(CarInterfaceBase):
     #  - TSS2 radar ACC cars w/o smartDSU installed (disables radar)
     #  - TSS-P DSU-less cars w/ CAN filter installed (no radar parser yet)
 
-    ret.openpilotLongitudinalControl = use_sdsu or ret.enableDsu or candidate in (TSS2_CAR - RADAR_ACC_CAR) or bool(ret.flags & ToyotaFlags.DISABLE_RADAR.value)
+    ret.openpilotLongitudinalControl = use_sdsu or ret.enableDsu or candidate in (TSS2_CAR - RADAR_ACC_CAR) or bool(ret.flags & ToyotaFlags.DISABLE_RADAR.value) or frogpilot_toggles.toyota_dsu_bypass
     ret.openpilotLongitudinalControl &= not frogpilot_toggles.disable_openpilot_long
 
     ret.autoResumeSng = ret.openpilotLongitudinalControl and candidate in NO_STOP_TIMER_CAR
@@ -179,7 +179,7 @@ class CarInterface(CarInterfaceBase):
         events.add(EventName.resumeRequired)
       if self.CS.low_speed_lockout:
         events.add(EventName.lowSpeedLockout)
-      if ret.vEgo < self.CP.minEnableSpeed:
+      if ret.vEgo < self.CP.minEnableSpeed and not frogpilot_toggles.sng_hack:
         events.add(EventName.belowEngageSpeed)
         if c.actuators.accel > 0.3:
           # some margin on the actuator to not false trigger cancellation while stopping

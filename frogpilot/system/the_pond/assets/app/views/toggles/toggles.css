@@ -1,0 +1,81 @@
+/* Toggles view. Two stacked static panels — back up / restore, and the destructive resets — that reuse
+ * the shared .btn classes; only the panel + actions layout is view-specific (REWRITE_PLAN §4.2, §5.2). */
+
+.toggles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 0 auto;
+  max-width: 640px;
+}
+
+.toggles-title {
+  font-size: var(--font-size-xl);
+}
+
+.toggles-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.toggles-panel-danger {
+  border-color: var(--color-danger);
+}
+
+.toggles-subtitle {
+  font-size: var(--font-size-lg);
+}
+
+.toggles-text {
+  color: var(--color-text-muted);
+  line-height: var(--line-height);
+}
+
+.toggles-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.toggles-actions.is-busy {
+  opacity: 0.72;
+}
+
+.toggles-file-name,
+.toggles-status {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.toggles-status {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-4);
+}
+
+.toggles-status.is-error {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.toggles-status.is-success {
+  color: var(--color-text);
+}
+
+/* The restore <input> lives in the component tree (so it unmounts with the view) but is never shown; the
+ * Restore button opens the picker programmatically. */
+.toggles-file-input {
+  display: none;
+}
+
+@media (min-width: 600px) {
+  .toggles-actions {
+    flex-direction: row;
+  }
+}

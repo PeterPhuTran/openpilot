@@ -1,0 +1,95 @@
+/* Troubleshoot view. A severity-coded list of detected device issues with a single danger-confirm reset.
+ * Reuses the shared .btn/.btn-danger/.modal classes; only the issue card + severity marker are
+ * view-specific (REWRITE_PLAN §4.2, §5.2). */
+
+.troubleshoot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin: 0 auto;
+  max-width: 760px;
+}
+
+.troubleshoot-header {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: space-between;
+}
+
+.troubleshoot-title {
+  font-size: var(--font-size-xl);
+}
+
+.troubleshoot-message {
+  color: var(--color-text-muted);
+  padding: var(--space-5) 0;
+  text-align: center;
+}
+
+.troubleshoot-retry {
+  align-self: center;
+}
+
+.troubleshoot-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.troubleshoot-issue {
+  align-items: flex-start;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left-width: 4px;
+  border-radius: var(--radius);
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.troubleshoot-issue-error {
+  border-left-color: var(--color-danger);
+}
+
+.troubleshoot-issue-warning {
+  border-left-color: var(--color-accent);
+}
+
+.troubleshoot-issue-badge {
+  align-items: center;
+  display: inline-flex;
+  flex-shrink: 0;
+  height: var(--tap-target);
+  justify-content: center;
+  width: var(--tap-target);
+}
+
+.troubleshoot-issue-error .troubleshoot-issue-badge {
+  color: var(--color-danger);
+}
+
+.troubleshoot-issue-warning .troubleshoot-issue-badge {
+  color: var(--color-accent);
+}
+
+.troubleshoot-issue-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.troubleshoot-issue-title {
+  font-weight: 600;
+}
+
+.troubleshoot-issue-detail {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  word-break: break-word;
+}

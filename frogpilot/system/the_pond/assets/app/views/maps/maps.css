@@ -1,0 +1,190 @@
+/* Maps view. The OSM offline-data picker: a status strip, the download/auto-update controls, and a
+ * tabbed Countries/States catalog of checkboxes. Reuses the shared .btn/.modal classes; only the
+ * status strip, schedule control, tabs, and catalog grid are view-specific (REWRITE_PLAN §4.2, §5.2). */
+
+.maps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin: 0 auto;
+  max-width: 900px;
+}
+
+.maps-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.maps-title {
+  font-size: var(--font-size-xl);
+}
+
+.maps-text {
+  color: var(--color-text-muted);
+  line-height: var(--line-height);
+}
+
+.maps-message {
+  color: var(--color-text-muted);
+  padding: var(--space-5) 0;
+  text-align: center;
+}
+
+.maps-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.maps-status {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.maps-status-item {
+  align-items: baseline;
+  display: flex;
+  gap: var(--space-3);
+  justify-content: space-between;
+}
+
+.maps-status-label {
+  color: var(--color-text-muted);
+}
+
+.maps-status-value {
+  font-weight: 600;
+}
+
+.maps-progress {
+  align-items: center;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
+
+.maps-progress-text {
+  font-weight: 600;
+}
+
+.maps-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.maps-schedule {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.maps-schedule-label {
+  color: var(--color-text-muted);
+}
+
+.maps-select {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font: inherit;
+  min-height: var(--tap-target);
+  padding: var(--space-2) var(--space-3);
+  width: 100%;
+}
+
+.maps-select:focus-visible {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+.maps-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.maps-tabs {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.maps-tab.is-active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-contrast);
+  font-weight: 600;
+}
+
+.maps-catalog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.maps-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.maps-group-title {
+  color: var(--color-text);
+  font-size: var(--font-size-lg);
+}
+
+.maps-options {
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: 1fr;
+}
+
+.maps-option {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  gap: var(--space-3);
+  min-height: var(--tap-target);
+  padding: var(--space-1) var(--space-2);
+}
+
+.maps-option-check {
+  flex: none;
+  height: 20px;
+  width: 20px;
+}
+
+.maps-option-name {
+  color: var(--color-text);
+}
+
+@media (min-width: 600px) {
+  .maps-controls {
+    align-items: flex-end;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .maps-schedule {
+    max-width: 320px;
+  }
+
+  .maps-options {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+}

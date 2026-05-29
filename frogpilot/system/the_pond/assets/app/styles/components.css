@@ -1,0 +1,185 @@
+/* Shared component styles: buttons, modal, toast. Views reuse these classes rather than restyling
+ * their own controls (REWRITE_PLAN §5.2, §17.4). */
+
+.btn {
+  align-items: center;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  gap: var(--space-2);
+  justify-content: center;
+  min-height: var(--tap-target);
+  padding: var(--space-2) var(--space-4);
+  transition:
+    background var(--transition),
+    border-color var(--transition),
+    opacity var(--transition);
+}
+
+.btn:hover {
+  border-color: var(--color-accent);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.btn:disabled:hover {
+  border-color: var(--color-border);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-contrast);
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  background: var(--color-accent-strong);
+  border-color: var(--color-accent-strong);
+}
+
+.btn-danger {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+  color: #fff;
+  font-weight: 600;
+}
+
+.btn-danger:hover {
+  background: var(--color-danger-strong);
+  border-color: var(--color-danger-strong);
+}
+
+.btn-ghost {
+  background: transparent;
+}
+
+.icon-btn {
+  align-items: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  height: var(--tap-target);
+  justify-content: center;
+  width: var(--tap-target);
+}
+
+.icon-btn:hover {
+  color: var(--color-accent);
+}
+
+.icon-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.icon-btn:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* modal */
+.modal-overlay {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: var(--space-4);
+  position: fixed;
+  z-index: 50;
+}
+
+.modal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 28rem;
+  padding: var(--space-5);
+  width: 100%;
+}
+
+.modal-title {
+  font-size: var(--font-size-lg);
+}
+
+.modal-message {
+  color: var(--color-text-muted);
+}
+
+.modal-actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+}
+
+.modal-field {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font: inherit;
+  min-height: var(--tap-target);
+  padding: var(--space-2) var(--space-3);
+  width: 100%;
+}
+
+.modal-field:focus-visible {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+/* toast */
+.toast-container {
+  bottom: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  left: 50%;
+  position: fixed;
+  transform: translateX(-50%);
+  z-index: 60;
+}
+
+.toast {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-2);
+  color: var(--color-text);
+  max-width: 90vw;
+  opacity: 0;
+  padding: var(--space-3) var(--space-4);
+  transform: translateY(12px);
+  transition:
+    opacity var(--transition),
+    transform var(--transition);
+}
+
+.toast-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast-error {
+  border-color: var(--color-danger);
+}
