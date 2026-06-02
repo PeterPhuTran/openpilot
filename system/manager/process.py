@@ -141,6 +141,12 @@ class ManagerProcess(ABC):
 
     return ret
 
+  def reap_if_dead(self) -> None:
+    if self.proc is not None and self.proc.exitcode is not None:
+      cloudlog.info(f"{self.name} is dead with {self.proc.exitcode}, restarting")
+      self.shutting_down = False
+      self.proc = None
+
   def signal(self, sig: int) -> None:
     if self.proc is None:
       return
@@ -186,6 +192,8 @@ class NativeProcess(ManagerProcess):
     if self.shutting_down:
       self.stop()
 
+    self.reap_if_dead()
+
     if self.proc is not None:
       return
 
@@ -216,6 +224,8 @@ class PythonProcess(ManagerProcess):
     # In case we only tried a non blocking stop we need to stop it before restarting
     if self.shutting_down:
       self.stop()
+
+    self.reap_if_dead()
 
     if self.proc is not None:
       return
