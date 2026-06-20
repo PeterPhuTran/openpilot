@@ -228,7 +228,10 @@ class CarState(CarStateBase):
 
     self.lkas_previously_enabled = self.lkas_enabled
     if self.CP.carFingerprint != CAR.TOYOTA_PRIUS_V:
-      self.lkas_enabled = self.lkas_hud.get("LDA_ON_MESSAGE") == 1
+      # Some TSS2 Toyotas (e.g. Prius Prime) drive LDA_ON_MESSAGE to 2 on press, not 1, so the
+      # old `== 1` check missed every press. `!= 0` catches both; default 0 keeps the early/empty-HUD
+      # frame False, and the bool rising-edge means one clean event per press (no cycling double-fire).
+      self.lkas_enabled = self.lkas_hud.get("LDA_ON_MESSAGE", 0) != 0
 
     # ZSS Support - Credit goes to Erich!
     if self.FPCP.fpFlags & ToyotaFrogPilotFlags.ZSS:
