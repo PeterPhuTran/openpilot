@@ -34,6 +34,7 @@ private:
   ItemStatus frictionStatus;
   ItemStatus latAccelStatus;
   ItemStatus lateralEngagementStatus;
+  ItemStatus lkasButtonStatus;
   ItemStatus longitudinalEngagementStatus;
   ItemStatus maxAccelerationStatus;
   ItemStatus speedJerkStatus;

@@ -225,6 +225,10 @@ class CarState(CarStateBase):
     # FrogPilot variables
     fp_ret = custom.FrogPilotCarState.new_message()
 
+    # Raw LKAS/LDA button signal, exposed for the "Buttons: LKAS" developer sidebar metric.
+    # Lets users verify on-screen whether pressing the LKAS button moves LDA_ON_MESSAGE (0 for non-TSS2).
+    fp_ret.lkasButton = int(self.lkas_button)
+
     if self.has_SDSU and not self.has_can_filter:
       prev_distance_button = self.distance_button
       self.distance_button = cp.vl["SDSU"]["FD_BUTTON"]

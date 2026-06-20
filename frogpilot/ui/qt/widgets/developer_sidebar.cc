@@ -68,6 +68,7 @@ void DeveloperSidebar::updateState(const UIState &s, const FrogPilotUIState &fs)
 
   const cereal::CarControl::Reader &carControl = fpsm["carControl"].getCarControl();
   const cereal::CarState::Reader &carState = sm["carState"].getCarState();
+  const cereal::FrogPilotCarState::Reader &frogpilotCarState = fpsm["frogpilotCarState"].getFrogpilotCarState();
   const cereal::FrogPilotPlan::Reader &frogpilotPlan = fpsm["frogpilotPlan"].getFrogpilotPlan();
   const cereal::LiveDelayData::Reader &liveDelay = fpsm["liveDelay"].getLiveDelay();
   const cereal::LiveParametersData::Reader &liveParameters = fpsm["liveParameters"].getLiveParameters();
@@ -125,6 +126,7 @@ void DeveloperSidebar::updateState(const UIState &s, const FrogPilotUIState &fs)
   frictionStatus = ItemStatus(QPair<QString, QString>(tr("FRICTION"), QString::number(liveTorqueParameters.getFrictionCoefficientFiltered(), 'f', 5)), metricColor);
   latAccelStatus = ItemStatus(QPair<QString, QString>(tr("LAT ACCEL"), QString::number(liveTorqueParameters.getLatAccelFactorFiltered(), 'f', 5)), metricColor);
   lateralEngagementStatus = ItemStatus(QPair<QString, QString>(tr("LATERAL %"), QString::number((lateralEngagementTime / totalEngagementTime) * 100.0f, 'f', 2) + "%"), metricColor);
+  lkasButtonStatus = ItemStatus(QPair<QString, QString>(tr("LKAS BTN"), QString::number(frogpilotCarState.getLkasButton())), metricColor);
   longitudinalEngagementStatus = ItemStatus(QPair<QString, QString>(tr("LONG %"), QString::number((longitudinalEngagementTime / totalEngagementTime) * 100.0f, 'f', 2) + "%"), metricColor);
   maxAccelerationStatus = ItemStatus(QPair<QString, QString>(tr("MAX ACCEL"), QString::number(maxAcceleration, 'f', 2) + accelerationUnit), metricColor);
   speedJerkStatus = ItemStatus(QPair<QString, QString>(tr("SPEED JERK"), QString::number(frogpilotPlan.getSpeedJerk())), metricColor);
@@ -160,6 +162,7 @@ void DeveloperSidebar::paintEvent(QPaintEvent *event) {
   metricMap.insert(14, &accelerationJerkStatus);
   metricMap.insert(15, &dangerJerkStatus);
   metricMap.insert(16, &speedJerkStatus);
+  metricMap.insert(17, &lkasButtonStatus);
 
   int count = 0;
   for (size_t i = 0; i < metricAssignments.size(); ++i) {
