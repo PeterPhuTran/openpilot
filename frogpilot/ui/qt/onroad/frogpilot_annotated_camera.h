@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/timing.h"
 #include "selfdrive/ui/qt/onroad/buttons.h"
 #include "selfdrive/ui/qt/widgets/cameraview.h"
 
