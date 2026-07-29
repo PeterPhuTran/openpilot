@@ -59,6 +59,7 @@ protected:
   void showEvent(QShowEvent *event) override;
 
 private:
+  void paintBlindSpotIndicator(QPainter &p);
   void paintCEMStatus(QPainter &p);
   void paintCompass(QPainter &p);
   void paintCurveSpeedControl(QPainter &p);
@@ -128,6 +129,7 @@ private:
   QColor blackColor(int alpha = 255) { return QColor(0, 0, 0, alpha); }
   QColor redColor(int alpha = 255) { return QColor(201, 34, 49, alpha); }
 
+  QElapsedTimer blindspotTimer;
   QElapsedTimer glowTimer;
   QElapsedTimer pendingLimitTimer;
   QElapsedTimer standstillTimer;
