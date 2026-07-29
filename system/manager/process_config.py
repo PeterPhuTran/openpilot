@@ -135,6 +135,7 @@ procs += [
   PythonProcess("frogpilot_process", "frogpilot.frogpilot_process", always_run),
   NativeProcess("mapd", "frogpilot/navigation", ["./mapd"], always_run),
   PythonProcess("speed_limit_filler", "frogpilot.system.speed_limit_filler", run_speed_limit_filler),
+  PythonProcess("visionbsmd", "frogpilot.vision_bsm", always_run),
 ]
 
 managed_processes = {p.name: p for p in procs}

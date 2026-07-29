@@ -495,10 +495,11 @@ class FrogPilotVariables:
       toggle.wheel_image = self.get_value("WheelIcon", cast=None, condition=custom_themes, default="stock")
 
     custom_ui = self.get_value("CustomUI")
+    toggle.vision_bsm = self.get_value("VisionBSM", condition=custom_ui)
     toggle.acceleration_path = toggle.openpilot_longitudinal and (self.get_value("AccelerationPath", condition=custom_ui) or toggle.debug_mode)
     toggle.adjacent_paths = self.get_value("AdjacentPath", condition=custom_ui)
-    toggle.blind_spot_indicator = has_bsm and self.get_value("BlindSpotIndicator", condition=custom_ui)
-    toggle.blind_spot_path = has_bsm and self.get_value("BlindSpotPath", condition=custom_ui)
+    toggle.blind_spot_indicator = (has_bsm or toggle.vision_bsm) and self.get_value("BlindSpotIndicator", condition=custom_ui)
+    toggle.blind_spot_path = (has_bsm or toggle.vision_bsm) and self.get_value("BlindSpotPath", condition=custom_ui)
     toggle.compass = self.get_value("Compass", condition=custom_ui)
     toggle.pedals_on_ui = self.get_value("PedalsOnUI", condition=custom_ui and toggle.openpilot_longitudinal)
     toggle.dynamic_pedals_on_ui = self.get_value("DynamicPedalsOnUI", condition=toggle.pedals_on_ui)
