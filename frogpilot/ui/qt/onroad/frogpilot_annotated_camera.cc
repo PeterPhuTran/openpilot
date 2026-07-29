@@ -222,6 +222,14 @@ void FrogPilotAnnotatedCameraWidget::updateState(const UIState &s, const FrogPil
     glowTimer.invalidate();
   }
 
+  if ((blindspotLeft || blindspotRight) && frogpilot_toggles.value("blind_spot_indicator").toBool()) {
+    if (!blindspotTimer.isValid()) {
+      blindspotTimer.start();
+    }
+  } else {
+    blindspotTimer.invalidate();
+  }
+
   if (speedLimitChanged) {
     if (!pendingLimitTimer.isValid()) {
       pendingLimitTimer.start();
@@ -253,6 +261,10 @@ void FrogPilotAnnotatedCameraWidget::mousePressEvent(QMouseEvent *mouseEvent) {
 }
 
 void FrogPilotAnnotatedCameraWidget::paintFrogPilotWidgets(QPainter &p, UIState &s) {
+  if ((blindspotLeft || blindspotRight) && frogpilot_toggles.value("blind_spot_indicator").toBool()) {
+    paintBlindSpotIndicator(p);
+  }
+
   if (!hideBottomIcons && frogpilot_toggles.value("cem_status").toBool()) {
     paintCEMStatus(p);
   } else {
@@ -401,6 +413,47 @@ void FrogPilotAnnotatedCameraWidget::paintBlindSpotPath(QPainter &p) {
   }
   if (track_adjacent_vertices[1].boundingRect().width() > 0 && blindspotRight) {
     p.drawPolygon(track_adjacent_vertices[1]);
+  }
+
+  p.restore();
+}
+
+void FrogPilotAnnotatedCameraWidget::paintBlindSpotIndicator(QPainter &p) {
+  p.save();
+
+  qreal phase = (blindspotTimer.elapsed() % 1000) / 1000.0 * 2 * M_PI;
+  qreal alphaFactor = 0.5 + 0.5 * sin(phase);
+
+  QColor chevronColor = bg_colors[STATUS_EXPERIMENTAL_MODE_ENABLED];
+  chevronColor.setAlphaF(0.3 + 0.7 * alphaFactor);
+
+  int chevronHeight = btn_size;
+  int chevronWidth = btn_size / 2;
+  int chevronSpacing = (chevronWidth * 3) / 4;
+
+  std::function<void(bool)> paintChevrons = [&](bool isLeft) {
+    int direction = isLeft ? 1 : -1;
+    int x = isLeft ? UI_BORDER_SIZE * 2 : width() - UI_BORDER_SIZE * 2;
+    int y = height() / 2;
+
+    for (int i = 0; i < 2; ++i) {
+      int xOffset = direction * (i * chevronSpacing);
+
+      QPainterPath chevron;
+      chevron.moveTo(x + xOffset + direction * chevronWidth, y - chevronHeight / 2);
+      chevron.lineTo(x + xOffset, y);
+      chevron.lineTo(x + xOffset + direction * chevronWidth, y + chevronHeight / 2);
+
+      p.strokePath(chevron, QPen(blackColor(150), 28, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+      p.strokePath(chevron, QPen(chevronColor, 18, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    }
+  };
+
+  if (blindspotLeft) {
+    paintChevrons(true);
+  }
+  if (blindspotRight) {
+    paintChevrons(false);
   }
 
   p.restore();

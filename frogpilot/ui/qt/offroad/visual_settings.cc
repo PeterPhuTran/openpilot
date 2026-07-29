@@ -42,6 +42,7 @@ FrogPilotVisualsPanel::FrogPilotVisualsPanel(FrogPilotSettingsWindow *parent, bo
     {"CustomUI", tr("Driving Screen Widgets"), tr("<b>Custom FrogPilot widgets</b> for the driving screen."), "../assets/icons/calibration.png"},
     {"AccelerationPath", tr("Acceleration Path"), tr("<b>Color the driving path by planned acceleration and braking.</b>"), ""},
     {"AdjacentPath", tr("Adjacent Lanes"), tr("<b>Show the driving paths for the left and right lanes.</b>"), ""},
+    {"BlindSpotIndicator", tr("Blind Spot Indicator"), tr("<b>Show a pulsing amber warning chevron on the side of the driving screen when a vehicle is detected in that side's blind spot.</b>"), ""},
     {"BlindSpotPath", tr("Blind Spot Path"), tr("<b>Show a red path when a vehicle is in that lane's blind spot.</b>"), ""},
     {"Compass", tr("Compass"), tr("<b>Show the current driving direction</b> with a simple on-screen compass."), ""},
     {"OnroadDistanceButton", tr("Driving Personality Button"), tr("<b>Control and view the current driving personality</b> via a driving screen widget."), ""},
@@ -269,6 +270,10 @@ void FrogPilotVisualsPanel::updateToggles() {
 
     if (key == "AccelerationPath") {
       setVisible &= parent->hasOpenpilotLongitudinal;
+    }
+
+    else if (key == "BlindSpotIndicator") {
+      setVisible &= parent->hasBSM;
     }
 
     else if (key == "BlindSpotPath") {
