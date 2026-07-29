@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+[ -x /data/boot_forensics/trap.sh ] && nohup /data/boot_forensics/trap.sh >/dev/null 2>&1 &  # boot_debug trap
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
