@@ -4,13 +4,16 @@ import time
 import numpy as np
 
 from msgq.visionipc import VisionIpcClient, VisionStreamType
+from PIL import Image, ImageDraw
 
 from openpilot.common.params import Params
 from openpilot.common.realtime import Priority, config_realtime_process
 from openpilot.common.swaglog import cloudlog
 
-# VisionBSMZones format: {"left": [x0, y0, x1, y1], "right": [x0, y0, x1, y1]}
-# with corners normalized to 0..1 of the driver camera frame
+# VisionBSMZones format: {"left": [[[x, y], ...], ...], "right": [[[x, y], ...], ...]}
+# where each side holds a list of polygons (3+ vertices, coordinates normalized
+# 0..1 of the driver camera frame), one per glass pane. Each polygon is scored
+# independently and a side triggers when any of its polygons detects a vehicle.
 
 BACKGROUND_ALPHA = 0.1
 BRIGHT_FRACTION_THRESHOLD = 0.10
@@ -25,14 +28,26 @@ RECONNECT_TIMEOUT = 50
 TOGGLE_CHECK_TIME = 5.0
 
 
-class ZoneState:
-  def __init__(self):
+class PolygonZone:
+  def __init__(self, points):
+    self.points = points
+    self.frame_shape = None
+    self.mask = None
     self.background = None
-    self.positive_streak = 0
-    self.last_positive = -HOLD_TIME
 
-  def update(self, crop, now):
-    zone = crop[::DOWNSAMPLE, ::DOWNSAMPLE].astype(np.float32)
+  def prepare(self, frame_shape):
+    if frame_shape == self.frame_shape:
+      return
+    height, width = frame_shape
+    mask_img = Image.new("L", (width, height), 0)
+    ImageDraw.Draw(mask_img).polygon([(x * width, y * height) for x, y in self.points], fill=1)
+    self.mask = np.array(mask_img, dtype=bool)[::DOWNSAMPLE, ::DOWNSAMPLE]
+    self.frame_shape = frame_shape
+    self.background = None
+
+  def detect(self, y_plane):
+    self.prepare(y_plane.shape)
+    zone = y_plane[::DOWNSAMPLE, ::DOWNSAMPLE][self.mask].astype(np.float32)
     if zone.size == 0:
       return False
 
@@ -44,8 +59,18 @@ class ZoneState:
       self.background = (1 - BACKGROUND_ALPHA) * self.background + BACKGROUND_ALPHA * zone
     else:
       self.background = zone
+    return detected
 
-    self.positive_streak = self.positive_streak + 1 if detected else 0
+
+class SideState:
+  def __init__(self, polygons):
+    self.zones = [PolygonZone(points) for points in polygons]
+    self.positive_streak = 0
+    self.last_positive = -HOLD_TIME
+
+  def update(self, y_plane, now):
+    results = [zone.detect(y_plane) for zone in self.zones]
+    self.positive_streak = self.positive_streak + 1 if any(results) else 0
     if self.positive_streak >= RAISE_FRAMES:
       self.last_positive = now
     return now - self.last_positive < HOLD_TIME
@@ -55,19 +80,18 @@ def parse_zones(zones):
   try:
     parsed = {}
     for side in ("left", "right"):
-      x0, y0, x1, y1 = (float(value) for value in zones[side])
-      if not 0 <= x0 < x1 <= 1 or not 0 <= y0 < y1 <= 1:
+      polygons = []
+      for polygon in zones[side]:
+        points = [(float(x), float(y)) for x, y in polygon]
+        if len(points) < 3 or not all(0 <= x <= 1 and 0 <= y <= 1 for x, y in points):
+          return None
+        polygons.append(points)
+      if not polygons:
         return None
-      parsed[side] = (x0, y0, x1, y1)
+      parsed[side] = polygons
     return parsed
   except (KeyError, TypeError, ValueError):
     return None
-
-
-def crop_zone(y_plane, zone):
-  height, width = y_plane.shape
-  x0, y0, x1, y1 = zone
-  return y_plane[int(y0 * height):int(y1 * height), int(x0 * width):int(x1 * width)]
 
 
 def publish_state(params_memory, left, right):
@@ -81,7 +105,7 @@ def vision_bsm_thread():
   params_memory = Params(memory=True)
 
   client = VisionIpcClient("camerad", VisionStreamType.VISION_STREAM_DRIVER, True)
-  states = {"left": ZoneState(), "right": ZoneState()}
+  states = None
   connected = False
   zones = None
   frame_count = 0
@@ -92,7 +116,10 @@ def vision_bsm_thread():
   while True:
     now = time.monotonic()
     if now - last_toggle_check > TOGGLE_CHECK_TIME:
-      zones = parse_zones(params.get("VisionBSMZones", return_default=True)) if params.get_bool("VisionBSM") else None
+      new_zones = parse_zones(params.get("VisionBSMZones", return_default=True)) if params.get_bool("VisionBSM") else None
+      if new_zones != zones:
+        zones = new_zones
+        states = {side: SideState(zones[side]) for side in zones} if zones is not None else None
       last_toggle_check = now
 
     if zones is None:
@@ -123,8 +150,8 @@ def vision_bsm_thread():
       continue
 
     y_plane = np.frombuffer(buf.data[:buf.uv_offset], dtype=np.uint8).reshape((-1, buf.stride))[:buf.height, :buf.width]
-    left = states["left"].update(crop_zone(y_plane, zones["left"]), now)
-    right = states["right"].update(crop_zone(y_plane, zones["right"]), now)
+    left = states["left"].update(y_plane, now)
+    right = states["right"].update(y_plane, now)
 
     if (left, right) != published or frame_count % (FRAME_SKIP * HEARTBEAT_FRAMES) == 0:
       publish_state(params_memory, left, right)
