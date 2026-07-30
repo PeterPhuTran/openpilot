@@ -23,6 +23,7 @@ DOWNSAMPLE = 4
 FRAME_SKIP = 4
 HEARTBEAT_FRAMES = 5
 HOLD_TIME = 1.0
+NIGHT_LEVEL = 60
 RAISE_FRAMES = 3
 RECONNECT_TIMEOUT = 50
 TOGGLE_CHECK_TIME = 5.0
@@ -55,8 +56,10 @@ class PolygonZone:
     if self.background is not None and self.background.shape == zone.shape:
       deviation = float(np.mean(np.abs(zone - self.background))) / (float(np.mean(self.background)) + 1.0)
       bright_fraction = float(np.mean(zone > BRIGHT_VALUE))
-      detected = deviation > DEVIATION_THRESHOLD or bright_fraction > BRIGHT_FRACTION_THRESHOLD
-      self.background = (1 - BACKGROUND_ALPHA) * self.background + BACKGROUND_ALPHA * zone
+      night = float(np.median(self.background)) < NIGHT_LEVEL
+      detected = deviation > DEVIATION_THRESHOLD or (night and bright_fraction > BRIGHT_FRACTION_THRESHOLD)
+      if not detected:
+        self.background = (1 - BACKGROUND_ALPHA) * self.background + BACKGROUND_ALPHA * zone
     else:
       self.background = zone
     return detected
