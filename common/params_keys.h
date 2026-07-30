@@ -474,7 +474,7 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
     {"VeryLongDistanceButtonControl", {PERSISTENT, INT, "6", "0", 2}},
     {"VisionBSM", {PERSISTENT, BOOL, "0", "0", 1}},
     {"VisionBSMState", {CLEAR_ON_MANAGER_START, JSON, "{}", "{}"}},
-    {"VisionBSMZones", {PERSISTENT, JSON}},
+    {"VisionBSMZones", {PERSISTENT, JSON, "{\"left\": [0.70, 0.30, 0.97, 0.58], \"right\": [0.04, 0.32, 0.28, 0.58]}", "{}"}},
     {"VoltSNG", {PERSISTENT, BOOL, "0", "0", 2}},
     {"WarningImmediateVolume", {PERSISTENT, INT, "101", "101", 2}},
     {"WarningSoftVolume", {PERSISTENT, INT, "101", "101", 2}},
