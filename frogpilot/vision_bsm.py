@@ -92,7 +92,7 @@ def vision_bsm_thread():
   while True:
     now = time.monotonic()
     if now - last_toggle_check > TOGGLE_CHECK_TIME:
-      zones = parse_zones(params.get("VisionBSMZones")) if params.get_bool("VisionBSM") else None
+      zones = parse_zones(params.get("VisionBSMZones", return_default=True)) if params.get_bool("VisionBSM") else None
       last_toggle_check = now
 
     if zones is None:
