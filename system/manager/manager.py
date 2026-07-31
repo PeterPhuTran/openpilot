@@ -14,12 +14,16 @@ from openpilot.common.params import Params, ParamKeyFlag
 from openpilot.common.text_window import TextWindow
 from openpilot.system.hardware import HARDWARE
 from openpilot.system.manager.helpers import unblock_stdout, write_onroad_params, save_bootlog
-from openpilot.system.manager.process import ensure_running
+from openpilot.system.manager.process import capture_watchdog_diagnostics, ensure_running
 from openpilot.system.manager.process_config import managed_processes
 from openpilot.system.athena.registration import register, UNREGISTERED_DONGLE_ID
 from openpilot.common.swaglog import cloudlog, add_file_handler
 from openpilot.system.version import get_build_metadata, terms_version, training_version
 from openpilot.system.hardware.hw import Paths
+
+# ui can keep its event loop (and so the watchdog) alive after it has stopped
+# painting, leaving a black screen the watchdog cannot detect
+UI_PAINT_TIMEOUT = 15.0
 
 from openpilot.frogpilot.common.frogpilot_functions import frogpilot_boot_functions, install_frogpilot, uninstall_frogpilot
 from openpilot.frogpilot.common.frogpilot_variables import get_frogpilot_toggles
@@ -144,11 +148,14 @@ def manager_thread() -> None:
   ignition_prev = False
 
   # FrogPilot variables
-  sm = sm.extend(['frogpilotPlan'])
+  sm = sm.extend(['frogpilotPlan', 'uiDebug'])
 
   params_memory = Params(memory=True)
 
   frogpilot_toggles = get_frogpilot_toggles()
+
+  last_ui_paint = time.monotonic()
+  ui_paint_seen = False
 
   while True:
     sm.update(1000)
@@ -183,6 +190,25 @@ def manager_thread() -> None:
                        for p in managed_processes.values() if p.proc)
     print(running)
     cloudlog.debug(running)
+
+    if sm.updated['uiDebug']:
+      last_ui_paint = time.monotonic()
+      ui_paint_seen = True
+
+    ui_proc = managed_processes.get('ui')
+    if not started or ui_proc is None or ui_proc.proc is None or not ui_proc.proc.is_alive():
+      ui_paint_seen = False
+      last_ui_paint = time.monotonic()
+    elif ui_paint_seen:
+      paint_dt = time.monotonic() - last_ui_paint
+      watchdog_dt = time.monotonic() - ui_proc.last_watchdog_time / 1e9
+      if paint_dt > UI_PAINT_TIMEOUT and watchdog_dt < (ui_proc.watchdog_max_dt or UI_PAINT_TIMEOUT):
+        cloudlog.error(f"ui alive but not painting for {paint_dt:.1f}s (watchdog {watchdog_dt:.1f}s), restarting")
+        sentry.capture_watchdog_timeout("ui-notpainting", paint_dt, ui_proc.proc.exitcode, ui_proc.proc.pid,
+                                        capture_watchdog_diagnostics("ui", ui_proc.proc.pid))
+        ui_proc.restart()
+        ui_paint_seen = False
+        last_ui_paint = time.monotonic()
 
     # send managerState
     msg = messaging.new_message('managerState', valid=True)
