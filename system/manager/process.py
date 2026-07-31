@@ -76,7 +76,7 @@ def capture_watchdog_diagnostics(name: str, pid: int) -> dict[str, str]:
       pass
     diag["gpu_state.txt"] = _gpu_state()
   if os.getenv("WATCHDOG_GDB") is not None:
-    diag["thread_backtrace.txt"] = _gdb_backtrace(pid, timeout=15)
+    diag["thread_backtrace.txt"] = _gdb_backtrace(pid, timeout=8)
     if weston_pid is not None:
       diag["weston_backtrace.txt"] = _gdb_backtrace(weston_pid, use_sudo=True)
   return diag
@@ -135,6 +135,8 @@ class ManagerProcess(ABC):
   last_watchdog_time = 0
   watchdog_max_dt: int | None = None
   watchdog_seen = False
+  watchdog_reported = False
+  watchdog_restart_dt: float | None = None
   shutting_down = False
   restart_if_crash = False
 
@@ -165,12 +167,18 @@ class ManagerProcess(ABC):
 
     if dt > self.watchdog_max_dt:
       if self.watchdog_seen and ENABLE_WATCHDOG:
-        cloudlog.error(f"Watchdog timeout for {self.name} (exitcode {self.proc.exitcode}) restarting ({started=})")
-        diagnostics = capture_watchdog_diagnostics(self.name, self.proc.pid)
-        sentry.capture_watchdog_timeout(self.name, dt, self.proc.exitcode, self.proc.pid, diagnostics)
-        self.restart()
+        if not self.watchdog_reported:
+          cloudlog.error(f"Watchdog timeout for {self.name} (exitcode {self.proc.exitcode}) after {dt:.1f}s ({started=})")
+          diagnostics = capture_watchdog_diagnostics(self.name, self.proc.pid)
+          sentry.capture_watchdog_timeout(self.name, dt, self.proc.exitcode, self.proc.pid, diagnostics)
+          self.watchdog_reported = True
+        restart_dt = self.watchdog_restart_dt if self.watchdog_restart_dt is not None else self.watchdog_max_dt
+        if dt > restart_dt:
+          cloudlog.error(f"Watchdog restarting {self.name} after {dt:.1f}s")
+          self.restart()
     else:
       self.watchdog_seen = True
+      self.watchdog_reported = False
 
   def stop(self, retry: bool = True, block: bool = True, sig: signal.Signals = None) -> int | None:
     if self.proc is None:
@@ -231,7 +239,7 @@ class ManagerProcess(ABC):
 
 
 class NativeProcess(ManagerProcess):
-  def __init__(self, name, cwd, cmdline, should_run, enabled=True, sigkill=False, watchdog_max_dt=None, restart_if_crash=False):
+  def __init__(self, name, cwd, cmdline, should_run, enabled=True, sigkill=False, watchdog_max_dt=None, watchdog_restart_dt=None, restart_if_crash=False):
     self.name = name
     self.cwd = cwd
     self.cmdline = cmdline
@@ -239,6 +247,7 @@ class NativeProcess(ManagerProcess):
     self.enabled = enabled
     self.sigkill = sigkill
     self.watchdog_max_dt = watchdog_max_dt
+    self.watchdog_restart_dt = watchdog_restart_dt
     self.restart_if_crash = restart_if_crash
     self.launcher = nativelauncher
 
@@ -262,13 +271,14 @@ class NativeProcess(ManagerProcess):
 
 
 class PythonProcess(ManagerProcess):
-  def __init__(self, name, module, should_run, enabled=True, sigkill=False, watchdog_max_dt=None, restart_if_crash=False):
+  def __init__(self, name, module, should_run, enabled=True, sigkill=False, watchdog_max_dt=None, watchdog_restart_dt=None, restart_if_crash=False):
     self.name = name
     self.module = module
     self.should_run = should_run
     self.enabled = enabled
     self.sigkill = sigkill
     self.watchdog_max_dt = watchdog_max_dt
+    self.watchdog_restart_dt = watchdog_restart_dt
     self.restart_if_crash = restart_if_crash
     self.launcher = launcher
 

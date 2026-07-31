@@ -23,3 +23,5 @@ export STAGING_ROOT="/data/safe_staging"
 
 # FrogPilot variables
 eval "$(/data/openpilot/frogpilot/system/environment_variables)"
+
+export WATCHDOG_GDB=1
