@@ -450,7 +450,7 @@ class FrogPilotVariables:
     toggle.goat_scream_alert = self.get_value("GoatScream", condition=custom_alerts)
     toggle.green_light_alert = self.get_value("GreenLightAlert", condition=custom_alerts)
     toggle.lead_departing_alert = self.get_value("LeadDepartingAlert", condition=custom_alerts)
-    toggle.loud_blindspot_alert = self.get_value("LoudBlindspotAlert", condition=custom_alerts and has_bsm)
+    toggle.loud_blindspot_alert = self.get_value("LoudBlindspotAlert", condition=custom_alerts and (has_bsm or self.params.get_bool("VisionBSM")))
     toggle.speed_limit_changed_alert = self.get_value("SpeedLimitChangedAlert", condition=custom_alerts)
 
     toggle.custom_personalities = toggle.openpilot_longitudinal and self.get_value("CustomPersonalities")

@@ -177,7 +177,7 @@ void FrogPilotSoundsPanel::updateToggles() {
     bool setVisible = parent->tuningLevel >= parent->frogpilotToggleLevels[key].toDouble();
 
     if (key == "LoudBlindspotAlert") {
-      setVisible &= parent->hasBSM;
+      setVisible &= parent->hasBSM || params.getBool("VisionBSM");
     }
 
     else if (key == "SpeedLimitChangedAlert") {
