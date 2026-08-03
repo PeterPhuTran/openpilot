@@ -35,9 +35,15 @@ def _gdb_backtrace(pid: int, use_sudo: bool = False, timeout: float = 5.0) -> st
   if use_sudo:
     cmd = ["sudo", *cmd]
   try:
-    return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout).stdout
-  except (OSError, subprocess.SubprocessError):
-    return ""
+    r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+    out = r.stdout
+    if r.stderr:
+      out += "===== gdb stderr =====" + r.stderr
+    return out
+  except subprocess.TimeoutExpired:
+    return f"<gdb timed out after {timeout}s>"
+  except (OSError, subprocess.SubprocessError) as e:
+    return f"<gdb failed: {e!r}>"
 
 
 def _gpu_state() -> str:
@@ -76,7 +82,7 @@ def capture_watchdog_diagnostics(name: str, pid: int) -> dict[str, str]:
       pass
     diag["gpu_state.txt"] = _gpu_state()
   if os.getenv("WATCHDOG_GDB") is not None:
-    diag["thread_backtrace.txt"] = _gdb_backtrace(pid, timeout=8)
+    diag["thread_backtrace.txt"] = _gdb_backtrace(pid, timeout=20)
     if weston_pid is not None:
       diag["weston_backtrace.txt"] = _gdb_backtrace(weston_pid, use_sudo=True)
   return diag

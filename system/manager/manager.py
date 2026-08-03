@@ -22,8 +22,13 @@ from openpilot.system.version import get_build_metadata, terms_version, training
 from openpilot.system.hardware.hw import Paths
 
 # ui can keep its event loop (and so the watchdog) alive after it has stopped
-# painting, leaving a black screen the watchdog cannot detect
-UI_PAINT_TIMEOUT = 15.0
+# painting, leaving a black screen the watchdog cannot detect. Capture early so
+# even a self-healing stall is diagnosed, but only restart once it looks
+# permanent; uiDebug also stops legitimately while a settings panel is open, so
+# recent touches suppress both.
+UI_PAINT_CAPTURE = 10.0
+UI_PAINT_RESTART = 40.0
+UI_TOUCH_GRACE = 20.0
 
 from openpilot.frogpilot.common.frogpilot_functions import frogpilot_boot_functions, install_frogpilot, uninstall_frogpilot
 from openpilot.frogpilot.common.frogpilot_variables import get_frogpilot_toggles
@@ -148,14 +153,16 @@ def manager_thread() -> None:
   ignition_prev = False
 
   # FrogPilot variables
-  sm = sm.extend(['frogpilotPlan', 'uiDebug'])
+  sm = sm.extend(['frogpilotPlan', 'uiDebug', 'touch'])
 
   params_memory = Params(memory=True)
 
   frogpilot_toggles = get_frogpilot_toggles()
 
   last_ui_paint = time.monotonic()
+  last_touch = time.monotonic()
   ui_paint_seen = False
+  ui_paint_reported = False
 
   while True:
     sm.update(1000)
@@ -194,21 +201,30 @@ def manager_thread() -> None:
     if sm.updated['uiDebug']:
       last_ui_paint = time.monotonic()
       ui_paint_seen = True
+      ui_paint_reported = False
+    if sm.updated['touch']:
+      last_touch = time.monotonic()
 
     ui_proc = managed_processes.get('ui')
     if not started or ui_proc is None or ui_proc.proc is None or not ui_proc.proc.is_alive():
       ui_paint_seen = False
+      ui_paint_reported = False
       last_ui_paint = time.monotonic()
-    elif ui_paint_seen:
+    elif ui_paint_seen and time.monotonic() - last_touch > UI_TOUCH_GRACE:
       paint_dt = time.monotonic() - last_ui_paint
       watchdog_dt = time.monotonic() - ui_proc.last_watchdog_time / 1e9
-      if paint_dt > UI_PAINT_TIMEOUT and watchdog_dt < (ui_proc.watchdog_max_dt or UI_PAINT_TIMEOUT):
-        cloudlog.error(f"ui alive but not painting for {paint_dt:.1f}s (watchdog {watchdog_dt:.1f}s), restarting")
-        sentry.capture_watchdog_timeout("ui-notpainting", paint_dt, ui_proc.proc.exitcode, ui_proc.proc.pid,
-                                        capture_watchdog_diagnostics("ui", ui_proc.proc.pid))
-        ui_proc.restart()
-        ui_paint_seen = False
-        last_ui_paint = time.monotonic()
+      if paint_dt > UI_PAINT_CAPTURE and watchdog_dt < (ui_proc.watchdog_max_dt or UI_PAINT_CAPTURE):
+        if not ui_paint_reported:
+          cloudlog.error(f"ui alive but not painting for {paint_dt:.1f}s (watchdog {watchdog_dt:.1f}s)")
+          sentry.capture_watchdog_timeout("ui-notpainting", paint_dt, ui_proc.proc.exitcode, ui_proc.proc.pid,
+                                          capture_watchdog_diagnostics("ui", ui_proc.proc.pid))
+          ui_paint_reported = True
+        if paint_dt > UI_PAINT_RESTART:
+          cloudlog.error(f"restarting ui after {paint_dt:.1f}s without painting")
+          ui_proc.restart()
+          ui_paint_seen = False
+          ui_paint_reported = False
+          last_ui_paint = time.monotonic()
 
     # send managerState
     msg = messaging.new_message('managerState', valid=True)
