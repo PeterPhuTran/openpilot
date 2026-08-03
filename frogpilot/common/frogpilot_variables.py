@@ -496,6 +496,7 @@ class FrogPilotVariables:
 
     custom_ui = self.get_value("CustomUI")
     toggle.vision_bsm = self.get_value("VisionBSM", condition=custom_ui)
+    toggle.blind_spot_camera = self.get_value("BlindSpotCamera", condition=custom_ui and toggle.vision_bsm)
     toggle.acceleration_path = toggle.openpilot_longitudinal and (self.get_value("AccelerationPath", condition=custom_ui) or toggle.debug_mode)
     toggle.adjacent_paths = self.get_value("AdjacentPath", condition=custom_ui)
     toggle.blind_spot_indicator = (has_bsm or toggle.vision_bsm) and self.get_value("BlindSpotIndicator", condition=custom_ui)

@@ -3,6 +3,7 @@
 #include "selfdrive/ui/qt/onroad/alerts.h"
 #include "selfdrive/ui/qt/onroad/annotated_camera.h"
 
+#include "frogpilot/ui/qt/onroad/blind_spot_camera.h"
 #include "frogpilot/ui/qt/onroad/frogpilot_onroad.h"
 
 class OnroadWindow : public QWidget {
@@ -21,6 +22,7 @@ private:
   // FrogPilot variables
   void mousePressEvent(QMouseEvent* mouseEvent);
 
+  BlindSpotCameraWidget *blind_spot_camera;
   FrogPilotAnnotatedCameraWidget *frogpilot_nvg;
   FrogPilotOnroadWindow *frogpilot_onroad;
 

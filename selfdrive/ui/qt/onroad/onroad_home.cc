@@ -39,6 +39,10 @@ OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
   QObject::connect(uiState(), &UIState::offroadTransition, this, &OnroadWindow::offroadTransition);
 
   // FrogPilot variables
+  blind_spot_camera = new BlindSpotCameraWidget(this);
+  blind_spot_camera->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+  blind_spot_camera->setVisible(false);
+
   frogpilot_nvg = new FrogPilotAnnotatedCameraWidget(this);
   frogpilot_onroad = new FrogPilotOnroadWindow(this);
   frogpilot_onroad->setAttribute(Qt::WA_TransparentForMouseEvents, true);
@@ -87,6 +91,22 @@ void OnroadWindow::updateState(const UIState &s, const FrogPilotUIState &fs) {
   nvg->frogpilot_toggles = frogpilot_toggles;
 
   frogpilot_onroad->setGeometry(rect());
+
+  const auto carState = (*s.sm)["carState"].getCarState();
+  bool blinkerLeft = carState.getLeftBlinker();
+  bool blinkerRight = carState.getRightBlinker();
+  bool showBlindSpotCamera = frogpilot_toggles.value("blind_spot_camera").toBool() && (blinkerLeft != blinkerRight);
+
+  if (showBlindSpotCamera) {
+    int cameraWidth = width() * 3 / 10;
+    int cameraHeight = cameraWidth * 5 / 6;
+    int cameraX = blinkerLeft ? UI_BORDER_SIZE * 2 : width() - cameraWidth - UI_BORDER_SIZE * 2;
+
+    blind_spot_camera->setSide(blinkerLeft);
+    blind_spot_camera->setGeometry(cameraX, (height() - cameraHeight) / 2, cameraWidth, cameraHeight);
+    blind_spot_camera->raise();
+  }
+  blind_spot_camera->setVisible(showBlindSpotCamera);
 
   frogpilot_nvg->updateState(s, fs);
   frogpilot_onroad->updateState(s, fs);

@@ -156,6 +156,7 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
     {"AvailableModelNames", {PERSISTENT, STRING, "", "", 1}},
     {"AvailableModels", {PERSISTENT, STRING, "", "", 1}},
     {"BlacklistedModels", {PERSISTENT, STRING, "", "", 2}},
+    {"BlindSpotCamera", {PERSISTENT, BOOL, "0", "0", 1}},
     {"BlindSpotIndicator", {PERSISTENT, BOOL, "1", "0", 1}},
     {"BlindSpotMetrics", {PERSISTENT, BOOL, "1", "0", 3}},
     {"BlindSpotPath", {PERSISTENT, BOOL, "1", "0", 1}},
