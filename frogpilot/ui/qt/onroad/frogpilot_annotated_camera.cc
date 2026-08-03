@@ -159,13 +159,6 @@ void FrogPilotAnnotatedCameraWidget::updateState(const UIState &s, const FrogPil
   accelerationEgo = carState.getAEgo();
   blindspotLeft = carState.getLeftBlindspot();
   blindspotRight = carState.getRightBlindspot();
-  if (frogpilot_toggles.value("vision_bsm").toBool()) {
-    QJsonObject visionBsm = QJsonDocument::fromJson(QByteArray::fromStdString(params_memory.get("VisionBSMState"))).object();
-    if (seconds_since_boot() - visionBsm.value("ts").toDouble(-1e9) < 2.0) {
-      blindspotLeft |= visionBsm.value("left").toBool();
-      blindspotRight |= visionBsm.value("right").toBool();
-    }
-  }
   blinkerLeft = carState.getLeftBlinker();
   blinkerRight = carState.getRightBlinker();
   brakeLights = frogpilotCarState.getBrakeLights();

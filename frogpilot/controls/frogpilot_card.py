@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import time
+
 from opendbc.safety import ALTERNATIVE_EXPERIENCE
 from openpilot.common.params import Params
 from openpilot.selfdrive.car.cruise import CRUISE_LONG_PRESS, ButtonType
@@ -7,6 +9,11 @@ from openpilot.selfdrive.selfdrived.events import ET
 from openpilot.frogpilot.common.frogpilot_utilities import is_FrogsGoMoo
 from openpilot.frogpilot.common.frogpilot_variables import ERROR_LOGS_PATH, NON_DRIVING_GEARS
 from openpilot.frogpilot.controls.lib.conditional_experimental_mode import CEStatus
+
+# visionbsmd publishes on change with a 1s heartbeat, so polling it at 5Hz from
+# the 100Hz car thread is plenty; the staleness window matches the driving screen
+VISION_BSM_POLL = 20
+VISION_BSM_STALE = 2.0
 
 class FrogPilotCard:
   def __init__(self, CP, FPCP):
@@ -17,6 +24,9 @@ class FrogPilotCard:
 
     self.accel_pressed = False
     self.always_on_lateral_allowed = False
+    self.vision_bsm_counter = 0
+    self.vision_bsm_left = False
+    self.vision_bsm_right = False
     self.decel_pressed = False
     self.distancePressed_previously = False
     self.force_coast = False
@@ -60,6 +70,19 @@ class FrogPilotCard:
       self.params.put_bool_nonblocking("ExperimentalMode", not sm["selfdriveState"].experimentalMode)
 
   def update(self, carState, frogpilotCarState, sm, frogpilot_toggles):
+    if frogpilot_toggles.vision_bsm:
+      self.vision_bsm_counter += 1
+      if self.vision_bsm_counter % VISION_BSM_POLL == 0:
+        state = self.params_memory.get("VisionBSMState") or {}
+        fresh = time.clock_gettime(time.CLOCK_BOOTTIME) - state.get("ts", -1e9) < VISION_BSM_STALE
+        self.vision_bsm_left = fresh and bool(state.get("left"))
+        self.vision_bsm_right = fresh and bool(state.get("right"))
+      carState.leftBlindspot |= self.vision_bsm_left
+      carState.rightBlindspot |= self.vision_bsm_right
+    else:
+      self.vision_bsm_left = False
+      self.vision_bsm_right = False
+
     if self.CP.brand == "hyundai":
       for be in carState.buttonEvents:
         if be.type == ButtonType.lkas and be.pressed and frogpilot_toggles.always_on_lateral_lkas:

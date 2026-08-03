@@ -50,19 +50,10 @@ FrogPilotEventName = custom.FrogPilotOnroadEvent.EventName
 
 IGNORED_SAFETY_MODES = (SafetyModel.silent, SafetyModel.noOutput)
 
-# only poll the vision blindspot state while a blinker is on, at 5Hz instead of 100Hz
-VISION_BSM_POLL = 20
-VISION_BSM_STALE = 2.0
-
 
 class SelfdriveD:
   def __init__(self, CP=None):
     self.params = Params()
-    self.params_memory = Params(memory=True)
-
-    self.vision_bsm_left = False
-    self.vision_bsm_right = False
-    self.vision_bsm_counter = 0
 
     # Ensure the current branch is cached, otherwise the first cycle lags
     build_metadata = get_build_metadata()
@@ -298,24 +289,14 @@ class SelfdriveD:
       self.events.add(EventName.excessiveActuation)
     # ******************************************************************************************
 
-    if self.frogpilot_toggles.vision_bsm:
-      if CS.leftBlinker or CS.rightBlinker:
-        if self.vision_bsm_counter % VISION_BSM_POLL == 0:
-          state = self.params_memory.get("VisionBSMState") or {}
-          fresh = time.clock_gettime(time.CLOCK_BOOTTIME) - state.get("ts", -1e9) < VISION_BSM_STALE
-          self.vision_bsm_left = fresh and bool(state.get("left"))
-          self.vision_bsm_right = fresh and bool(state.get("right"))
-        self.vision_bsm_counter += 1
-
-        if (CS.leftBlinker and self.vision_bsm_left) or (CS.rightBlinker and self.vision_bsm_right):
-          if self.frogpilot_toggles.loud_blindspot_alert:
-            self.frogpilot_events.add(FrogPilotEventName.laneChangeBlockedLoud)
-          else:
-            self.events.add(EventName.laneChangeBlocked)
-      else:
-        self.vision_bsm_counter = 0
-        self.vision_bsm_left = False
-        self.vision_bsm_right = False
+    # the lane change alert below only runs while openpilot is steering, so cover
+    # the manually driven case too now that a blind spot can come from vision
+    if (CS.leftBlinker and CS.leftBlindspot) or (CS.rightBlinker and CS.rightBlindspot):
+      if self.sm['modelV2'].meta.laneChangeState != LaneChangeState.preLaneChange:
+        if self.frogpilot_toggles.loud_blindspot_alert:
+          self.frogpilot_events.add(FrogPilotEventName.laneChangeBlockedLoud)
+        else:
+          self.events.add(EventName.laneChangeBlocked)
 
     # Handle lane change
     if self.sm['modelV2'].meta.laneChangeState == LaneChangeState.preLaneChange:
