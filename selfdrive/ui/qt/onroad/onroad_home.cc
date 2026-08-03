@@ -42,6 +42,10 @@ OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
   blind_spot_camera = new BlindSpotCameraWidget(this);
   blind_spot_camera->setAttribute(Qt::WA_TransparentForMouseEvents, true);
   blind_spot_camera->setVisible(false);
+  split->addWidget(blind_spot_camera);
+  for (int i = 0; i < split->count(); i++) {
+    split->setStretch(i, 1);
+  }
 
   frogpilot_nvg = new FrogPilotAnnotatedCameraWidget(this);
   frogpilot_onroad = new FrogPilotOnroadWindow(this);
@@ -98,13 +102,18 @@ void OnroadWindow::updateState(const UIState &s, const FrogPilotUIState &fs) {
   bool showBlindSpotCamera = frogpilot_toggles.value("blind_spot_camera").toBool() && (blinkerLeft != blinkerRight);
 
   if (showBlindSpotCamera) {
-    int cameraWidth = width() * 3 / 10;
-    int cameraHeight = cameraWidth * 5 / 6;
-    int cameraX = blinkerLeft ? UI_BORDER_SIZE * 2 : width() - cameraWidth - UI_BORDER_SIZE * 2;
+    // signalled side gets its own half of the screen, the road keeps the other
+    int cameraIndex = blinkerLeft ? 0 : split->count() - 1;
+    if (split->indexOf(blind_spot_camera) != cameraIndex) {
+      split->removeWidget(blind_spot_camera);
+      split->insertWidget(cameraIndex, blind_spot_camera);
+
+      for (int i = 0; i < split->count(); i++) {
+        split->setStretch(i, 1);
+      }
+    }
 
     blind_spot_camera->setSide(blinkerLeft);
-    blind_spot_camera->setGeometry(cameraX, (height() - cameraHeight) / 2, cameraWidth, cameraHeight);
-    blind_spot_camera->raise();
   }
   blind_spot_camera->setVisible(showBlindSpotCamera);
 

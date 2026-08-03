@@ -49,7 +49,7 @@ FrogPilotVisualsPanel::FrogPilotVisualsPanel(FrogPilotSettingsWindow *parent, bo
     {"PedalsOnUI", tr("Gas / Brake Pedal Indicators"), tr("<b>On-screen gas and brake indicators.</b><br><br><b>Dynamic</b>: Opacity changes according to how much openpilot is accelerating or braking<br><b>Static</b>: Full when active, dim when not"), ""},
     {"RotatingWheel", tr("Rotating Steering Wheel"), tr("<b>Rotate the driving screen wheel</b> with the physical steering wheel."), ""},
     {"VisionBSM", tr("Vision Blind Spot Monitor"), tr("<b>Detect blind spot vehicles with the driver facing camera through the rear side windows.</b><br><br>Requires a one-time camera zone calibration and is advisory only, so always check your mirrors!"), ""},
-    {"BlindSpotCamera", tr("Blind Spot Camera View"), tr("<b>Show a live view of the blind spot on that side of the driving screen whenever a turn signal is on.</b><br><br>Uses the driver facing camera looking out through the rear side window, so the image is infrared tinted and fisheye distorted."), ""},
+    {"BlindSpotCamera", tr("Blind Spot Camera View"), tr("<b>Split the driving screen while a turn signal is on and show a live view of that side's blind spot in its half.</b><br><br>Uses the driver facing camera looking out through the rear side window, so the image is infrared tinted and fisheye distorted."), ""},
 
     {"ModelUI", tr("Model UI"), tr("<b>Model visualizations</b> for the driving path, lane lines, path edges, and road edges."), "../../frogpilot/assets/toggle_icons/icon_road.png"},
     {"DynamicPathWidth", tr("Dynamic Path Width"), tr("<b>Change the path width based on engagement.</b><br><br><b>Fully Engaged</b>: 100%<br><b>Always On Lateral</b>: 75%<br><b>Disengaged</b>: 50%"), ""},
